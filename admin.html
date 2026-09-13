@@ -8,19 +8,29 @@
     * { box-sizing: border-box; font-family: sans-serif; margin: 0; padding: 0; }
     body { padding: 16px; background: #e9ecef; color: #333; }
     h1 { margin-bottom: 16px; }
+    .top-controls { display: flex; gap: 8px; margin-bottom: 16px; flex-direction: column; }
     .order-card { background: white; padding: 16px; border-radius: 8px; margin-bottom: 12px; border-left: 6px solid #ffc107; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
     .order-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
     .order-time { font-size: 14px; color: #6c757d; font-weight: bold; }
-    .done { border-left-color: #28a745; opacity: 0.6; }
-    button { background: #28a745; color: white; border: none; padding: 8px 12px; border-radius: 4px; margin-top: 10px; cursor: pointer; }
-    .enable-audio-btn { background: #007bff; font-size: 16px; padding: 10px 16px; margin-bottom: 16px; width: 100%; }
+    .done { border-left-color: #28a745; opacity: 0.75; }
+    .btn { border: none; padding: 10px 14px; border-radius: 4px; font-weight: bold; cursor: pointer; }
+    .btn-audio { background: #007bff; color: white; width: 100%; }
+    .btn-clear-all { background: #dc3545; color: white; width: 100%; }
+    .btn-serve { background: #28a745; color: white; margin-top: 10px; margin-right: 8px; }
+    .btn-delete { background: #6c757d; color: white; margin-top: 10px; }
+    .btn-delete-served { background: #dc3545; color: white; margin-top: 10px; }
   </style>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 </head>
 <body>
   <h1>Kitchen Live Orders</h1>
-  <button id="audio-btn" class="enable-audio-btn" onclick="enableAudio()">🔔 Enable Sound Notifications</button>
+  
+  <div class="top-controls">
+    <button id="audio-btn" class="btn btn-audio" onclick="enableAudio()">🔔 Enable Sound Notifications</button>
+    <button class="btn btn-clear-all" onclick="clearCompletedOrders()">🧹 Clear Completed Orders</button>
+  </div>
+
   <div id="orders-list">Connecting to Firebase...</div>
 
   <script>
@@ -95,7 +105,6 @@
         const id = doc.id;
         const itemsText = order.items ? order.items.map(i => `<li>${i.name} x${i.qty}</li>`).join('') : '';
 
-        // Formats time explicitly to Asia/Kathmandu (Nepal Time UTC+5:45)
         let formattedTime = "Just now";
         if (order.timestamp) {
           const date = order.timestamp.toDate();
@@ -107,15 +116,20 @@
           });
         }
 
+        const isServed = order.status === 'Served';
+
         list.innerHTML += `
-          <div class="order-card ${order.status === 'Served' ? 'done' : ''}">
+          <div class="order-card ${isServed ? 'done' : ''}">
             <div class="order-header">
               <h3>Table #${order.table} [${order.status}]</h3>
               <span class="order-time">🕒 ${formattedTime} NPT</span>
             </div>
             <ul style="margin: 8px 0 8px 20px;">${itemsText}</ul>
             <p><strong>Total: NPR ${order.total}</strong></p>
-            ${order.status === 'Pending' ? `<button onclick="markServed('${id}')">Mark as Served</button>` : ''}
+            <div>
+              ${!isServed ? `<button class="btn btn-serve" onclick="markServed('${id}')">Mark as Served</button>` : ''}
+              <button class="btn ${isServed ? 'btn-delete-served' : 'btn-delete'}" onclick="deleteOrder('${id}')">Delete Order</button>
+            </div>
           </div>
         `;
       });
@@ -123,6 +137,25 @@
 
     async function markServed(id) {
       await db.collection("orders").doc(id).update({ status: "Served" });
+    }
+
+    async function deleteOrder(id) {
+      if (confirm("Are you sure you want to delete this order?")) {
+        await db.collection("orders").doc(id).delete();
+      }
+    }
+
+    async function clearCompletedOrders() {
+      if (!confirm("Remove all completed (Served) orders?")) return;
+      
+      const snapshot = await db.collection("orders").where("status", "==", "Served").get();
+      const batch = db.batch();
+      
+      snapshot.forEach(doc => {
+        batch.delete(doc.ref);
+      });
+
+      await batch.commit();
     }
   </script>
 </body>
