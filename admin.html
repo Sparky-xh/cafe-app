@@ -9,6 +9,8 @@
     body { padding: 16px; background: #e9ecef; color: #333; }
     h1 { margin-bottom: 16px; }
     .order-card { background: white; padding: 16px; border-radius: 8px; margin-bottom: 12px; border-left: 6px solid #ffc107; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+    .order-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+    .order-time { font-size: 14px; color: #6c757d; font-weight: bold; }
     .done { border-left-color: #28a745; opacity: 0.6; }
     button { background: #28a745; color: white; border: none; padding: 8px 12px; border-radius: 4px; margin-top: 10px; cursor: pointer; }
     .enable-audio-btn { background: #007bff; font-size: 16px; padding: 10px 16px; margin-bottom: 16px; width: 100%; }
@@ -38,7 +40,6 @@
     let audioCtx = null;
     let isInitialLoad = true;
 
-    // Enable sound via user gesture (required by modern web browsers)
     function enableAudio() {
       audioCtx = new (window.AudioContext || window.webkitAudioContext)();
       const btn = document.getElementById('audio-btn');
@@ -47,10 +48,8 @@
       btn.disabled = true;
     }
 
-    // Play a dual-tone notification chime
     function playChime() {
       if (!audioCtx) return;
-      
       const now = audioCtx.currentTime;
       const osc1 = audioCtx.createOscillator();
       const osc2 = audioCtx.createOscillator();
@@ -58,8 +57,8 @@
 
       osc1.type = 'sine';
       osc2.type = 'sine';
-      osc1.frequency.setValueAtTime(587.33, now); // D5
-      osc2.frequency.setValueAtTime(880, now + 0.15); // A5
+      osc1.frequency.setValueAtTime(587.33, now);
+      osc2.frequency.setValueAtTime(880, now + 0.15);
 
       gain.gain.setValueAtTime(0.3, now);
       gain.gain.exponentialRampToValueAtTime(0.001, now + 0.6);
@@ -74,11 +73,9 @@
       osc2.stop(now + 0.6);
     }
 
-    // Firestore Realtime Listener
-    db.collection("orders").onSnapshot(snapshot => {
+    db.collection("orders").orderBy("timestamp", "desc").onSnapshot(snapshot => {
       const list = document.getElementById('orders-list');
       
-      // Play chime on incoming added documents (skipping initial page fetch)
       snapshot.docChanges().forEach(change => {
         if (change.type === "added" && !isInitialLoad) {
           playChime();
@@ -98,9 +95,24 @@
         const id = doc.id;
         const itemsText = order.items ? order.items.map(i => `<li>${i.name} x${i.qty}</li>`).join('') : '';
 
+        // Formats time explicitly to Asia/Kathmandu (Nepal Time UTC+5:45)
+        let formattedTime = "Just now";
+        if (order.timestamp) {
+          const date = order.timestamp.toDate();
+          formattedTime = date.toLocaleTimeString('en-US', {
+            timeZone: 'Asia/Kathmandu',
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: true
+          });
+        }
+
         list.innerHTML += `
           <div class="order-card ${order.status === 'Served' ? 'done' : ''}">
-            <h3>Table #${order.table} [${order.status}]</h3>
+            <div class="order-header">
+              <h3>Table #${order.table} [${order.status}]</h3>
+              <span class="order-time">🕒 ${formattedTime} NPT</span>
+            </div>
             <ul style="margin: 8px 0 8px 20px;">${itemsText}</ul>
             <p><strong>Total: NPR ${order.total}</strong></p>
             ${order.status === 'Pending' ? `<button onclick="markServed('${id}')">Mark as Served</button>` : ''}
