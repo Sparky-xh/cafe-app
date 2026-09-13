@@ -246,16 +246,29 @@
       initKitchenDisplay();
     });
 
-    function enableAudio() {
-      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      const btn = document.getElementById('audio-btn');
-      btn.innerText = "🔔 Sound Active";
-      btn.style.background = "#64748b";
-      btn.disabled = true;
+    async function enableAudio() {
+      try {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') {
+          await audioCtx.resume();
+        }
+        // Play an silent or test pop to unlock the audio channel on mobile
+        playChime();
+        const btn = document.getElementById('audio-btn');
+        btn.innerText = "🔔 Sound Active";
+        btn.style.background = "#22c55e";
+        btn.disabled = true;
+      } catch (e) {
+        console.error("Audio activation error:", e);
+        alert("Could not enable audio. Please tap again.");
+      }
     }
 
     function playChime() {
       if (!audioCtx) return;
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
       const now = audioCtx.currentTime;
       const osc1 = audioCtx.createOscillator();
       const osc2 = audioCtx.createOscillator();
@@ -274,7 +287,6 @@
       osc2.start(now + 0.15); osc2.stop(now + 0.6);
     }
 
-    // Safe timestamp helper functions to prevent crash if timestamp is null or missing
     function getMillis(ts) {
       if (ts && typeof ts.toMillis === 'function') return ts.toMillis();
       return Date.now();
@@ -289,6 +301,7 @@
 
     function initKitchenDisplay() {
       isInitialLoad = true;
+      
       db.collection("orders").onSnapshot(snapshot => {
         snapshot.docChanges().forEach(change => {
           if (change.type === "added" && !isInitialLoad) playChime();
@@ -319,12 +332,13 @@
         renderOrders();
         renderArchivedTable();
       }, error => {
-        console.error("Firestore Error:", error);
+        console.error("Firestore Error Code:", error.code, "Message:", error.message);
         document.getElementById('orders-list').innerHTML = `
           <div class="empty-state">
             <div class="empty-icon">⚠️</div>
-            <div class="empty-title">Connection Failed</div>
+            <div class="empty-title">Firestore Error (${error.code || 'Connection'})</div>
             <div class="empty-subtitle" style="color: #ef4444; font-weight: 600; margin-top: 8px;">${error.message}</div>
+            <div style="font-size: 12px; color: #64748b; margin-top: 12px;">Tip: Check if your 'orders' collection exists in Firebase Console and security rules allow read/write.</div>
           </div>
         `;
       });
@@ -381,22 +395,4 @@
       
       let html = `<button class="table-chip ${selectedTable === 'ALL' ? 'active' : ''}" onclick="filterByTable('ALL')">All Tables</button>`;
       uniqueTables.forEach(t => {
-        html += `<button class="table-chip ${selectedTable === t ? 'active' : ''}" onclick="filterByTable('${t}')">${t === 'Takeaway' ? 'Takeaway' : 'Table #' + t}</button>`;
-      });
-      filterBar.innerHTML = html;
-    }
-
-    function filterByTable(tableNum) {
-      selectedTable = tableNum;
-      renderTableFilterBar();
-      renderOrders();
-    }
-
-    function renderOrders() {
-      const list = document.getElementById('orders-list');
-      
-      let filtered = activeOrders;
-      if (selectedStatus !== 'ALL') {
-        filtered = filtered.filter(o => o.status === selectedStatus);
-      }
-      if (selectedTable 
+        html += `<bu
