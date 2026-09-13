@@ -27,6 +27,9 @@
     .header-actions { display: flex; gap: 10px; align-items: center; }
     .enable-audio-btn { background: #2563eb; color: white; font-size: 13px; font-weight: 700; padding: 10px 16px; border: none; border-radius: 10px; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 12px rgba(37,99,235,0.25); }
     .enable-audio-btn:hover { background: #1d4ed8; }
+    .enable-audio-btn.sound-off { background: #64748b; box-shadow: 0 4px 12px rgba(100,116,139,0.25); }
+    .enable-audio-btn.sound-off:hover { background: #475569; }
+    
     .archive-view-btn { background: #f1f5f9; color: #475569; font-size: 13px; font-weight: 700; padding: 10px 16px; border: 1px solid #cbd5e1; border-radius: 10px; cursor: pointer; transition: all 0.2s; }
     .archive-view-btn:hover { background: #e2e8f0; color: #0f172a; }
 
@@ -172,11 +175,9 @@
       </div>
       <div class="header-actions">
         <button class="archive-view-btn" onclick="openArchiveModal()">📦 View Archives</button>
-        <button id="audio-btn" class="enable-audio-btn" onclick="enableAudio()">🔔 Enable Sound</button>
+        <button id="audio-btn" class="enable-audio-btn" onclick="toggleAudio()">🔔 Enable Sound</button>
       </div>
     </div>
-
-    <!-- Real-time Stats Header -->
     <div class="metrics-grid">
       <div class="metric-card interactive" id="card-pending" onclick="filterByStatus('Pending')">
         <div>
@@ -200,7 +201,6 @@
         <div class="metric-icon icon-revenue">💰</div>
       </div>
     </div>
-
     <!-- Filter Bar & Active Status Indicator -->
     <div class="filter-section">
       <div class="table-nav" id="table-filter-bar">
@@ -219,8 +219,8 @@
     </div>
 
   </div>
-
-  <script>
+  
+<script>
     const firebaseConfig = {
       apiKey: "AIzaSyC616K7b9vsNDcuVrXQpDYOS2L9h1OpxIw",
       authDomain: "my-cafe12.firebaseapp.com",
@@ -235,6 +235,7 @@
     const db = firebase.firestore();
 
     let audioCtx = null;
+    let soundEnabled = false;
     let isInitialLoad = true;
     let rawAllOrders = [];
     let activeOrders = [];
@@ -246,25 +247,37 @@
       initKitchenDisplay();
     });
 
-    async function enableAudio() {
-      try {
-        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        if (audioCtx.state === 'suspended') {
-          await audioCtx.resume();
+    async function toggleAudio() {
+      const btn = document.getElementById('audio-btn');
+      
+      if (!soundEnabled) {
+        // Enable Sound
+        try {
+          if (!audioCtx) {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+          }
+          if (audioCtx.state === 'suspended') {
+            await audioCtx.resume();
+          }
+          playChime();
+          soundEnabled = true;
+          btn.innerText = "🔕 Disable Sound";
+          btn.style.background = "#22c55e";
+          btn.classList.remove('sound-off');
+        } catch (e) {
+          console.error("Audio activation error:", e);
+          alert("Could not enable audio. Please tap again.");
         }
-        playChime();
-        const btn = document.getElementById('audio-btn');
-        btn.innerText = "🔔 Sound Active";
-        btn.style.background = "#22c55e";
-        btn.disabled = true;
-      } catch (e) {
-        console.error("Audio activation error:", e);
-        alert("Could not enable audio. Please tap again.");
+      } else {
+        // Disable Sound
+        soundEnabled = false;
+        btn.innerText = "🔔 Enable Sound";
+        btn.style.background = "#64748b";
+        btn.classList.add('sound-off');
       }
     }
-
-    function playChime() {
-      if (!audioCtx) return;
+function playChime() {
+      if (!soundEnabled || !audioCtx) return;
       if (audioCtx.state === 'suspended') {
         audioCtx.resume();
       }
@@ -286,7 +299,7 @@
       osc2.start(now + 0.15); osc2.stop(now + 0.6);
     }
 
-    function getMillis(ts) {
+  function getMillis(ts) {
       if (ts && typeof ts.toMillis === 'function') return ts.toMillis();
       return Date.now();
     }
@@ -322,8 +335,7 @@
             activeOrders.push(item);
           }
         });
-
-        activeOrders.sort((a, b) => getMillis(b.timestamp) - getMillis(a.timestamp));
+  activeOrders.sort((a, b) => getMillis(b.timestamp) - getMillis(a.timestamp));
         archivedOrders.sort((a, b) => getMillis(b.timestamp) - getMillis(a.timestamp));
 
         updateMetrics();
@@ -362,9 +374,8 @@
       updateStatusIndicator();
       renderTableFilterBar();
       renderOrders();
-    }
-
-    function updateStatusIndicator() {
+  }
+        function updateStatusIndicator() {
       const indicator = document.getElementById('status-filter-indicator');
       const cardPending = document.getElementById('card-pending');
       const cardServed = document.getElementById('card-served');
@@ -394,7 +405,7 @@
       
       let html = `<button class="table-chip ${selectedTable === 'ALL' ? 'active' : ''}" onclick="filterByTable('ALL')">All Tables</button>`;
       uniqueTables.forEach(t => {
-        html += `<button class="table-chip ${selectedTable === t ? 'active' : ''}" onclick="fil      tByTable('${t}')}">${t === 'Takeaway' ? 'Takeaway' : 'Table #' + t}</button>`;
+        html += `<button class="table-chip ${selectedTable === t ? 'active' : ''}" onclick="filterByTable('${t}')">${t === 'Takeaway' ? 'Takeaway' : 'Table #' + t}</button>`;
       });
       filterBar.innerHTML = html;
     }
@@ -427,7 +438,7 @@
         return;
       }
 
-      list.innerHTML = '';
+  list.innerHTML = '';
       filtered.forEach(order => {
         const id = order.id;
         const itemsText = order.items ? order.items.map(i => `<li><span>${i.name}</span> <span class="qty">x${i.qty}</span></li>`).join('') : '';
@@ -505,9 +516,8 @@
         <div class="ticket-footer">--- Order ID: ${id.substring(0, 8)} ---</div>
       `;
       window.print();
-    }
-
-    async function markServed(id) { await db.collection("orders").doc(id).update({ status: "Served" }); }
+  }
+      async function markServed(id) { await db.collection("orders").doc(id).update({ status: "Served" }); }
     async function archiveOrder(id) { await db.collection("orders").doc(id).update({ status: "Archived" }); }
     async function restoreOrder(id) { await db.collection("orders").doc(id).update({ status: "Served" }); }
     async function editTableNumber(id, currentTable) {
