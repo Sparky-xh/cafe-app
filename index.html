@@ -7,7 +7,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     * { box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; margin: 0; padding: 0; }
-    body { background: #f8fafc; color: #0f172a; min-height: 100vh; padding-bottom: 100px; }
+    body { background: #f8fafc; color: #0f172a; min-height: 100vh; padding-bottom: 120px; }
     
     /* Header & Branding */
     .header { background: #1e293b; color: white; padding: 28px 20px 24px 20px; text-align: center; border-bottom-left-radius: 20px; border-bottom-right-radius: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
@@ -16,6 +16,17 @@
     
     /* Container Grid Layout */
     .main-container { max-width: 1100px; margin: 0 auto; padding: 0 16px; }
+
+    /* Active Order Section */
+    .active-order-card { background: #eff6ff; border: 1.5px solid #3b82f6; border-radius: 16px; padding: 16px; margin-top: 16px; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(59,130,246,0.08); }
+    .active-order-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; border-bottom: 1px solid #dbeafe; padding-bottom: 6px; }
+    .active-order-title { font-weight: 700; color: #1e40af; font-size: 15px; }
+    .active-order-status { font-size: 12px; font-weight: 700; background: #dbeafe; color: #1e40af; padding: 2px 8px; border-radius: 12px; }
+    .active-items-list { list-style: none; margin: 8px 0; }
+    .active-items-list li { font-size: 14px; color: #1e3a8a; font-weight: 500; padding: 2px 0; display: flex; justify-content: space-between; }
+    .active-order-actions { display: flex; gap: 8px; margin-top: 12px; }
+    .btn-edit-order { background: #0284c7; color: white; border: none; padding: 8px 14px; border-radius: 8px; font-weight: 700; font-size: 13px; cursor: pointer; flex: 1; }
+    .btn-cancel-order { background: #ef4444; color: white; border: none; padding: 8px 14px; border-radius: 8px; font-weight: 700; font-size: 13px; cursor: pointer; }
 
     /* Table Selector Card */
     .table-card { background: #ffffff; padding: 16px; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); margin-top: -20px; margin-bottom: 20px; border: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center; }
@@ -76,6 +87,9 @@
     
     <!-- Menu Section -->
     <div id="menu-section">
+      <!-- Active Placed Order Card -->
+      <div id="active-order-container"></div>
+      
       <div id="menu-container"></div>
     </div>
 
@@ -156,6 +170,90 @@
     ];
 
     let cart = {};
+    let activeOrderId = localStorage.getItem('activeOrderId') || null;
+
+    // Helper: Map menu item name back to menu ID
+    function getItemIdByName(name) {
+      for (const cat of menuData) {
+        const found = cat.items.find(i => i.name === name);
+        if (found) return found.id;
+      }
+      return null;
+    }
+
+    // Listen to Active Order Status from Firebase
+    function listenToActiveOrder() {
+      if (!activeOrderId) {
+        document.getElementById('active-order-container').innerHTML = '';
+        return;
+      }
+
+      db.collection("orders").doc(activeOrderId).onSnapshot(doc => {
+        const container = document.getElementById('active-order-container');
+        
+        if (!doc.exists || doc.data().status === 'Archived') {
+          localStorage.removeItem('activeOrderId');
+          activeOrderId = null;
+          container.innerHTML = '';
+          return;
+        }
+
+        const data = doc.data();
+        let itemsHtml = data.items.map(i => `<li><span>${i.name}</span> <span>x${i.qty} (NPR ${i.price * i.qty})</span></li>`).join('');
+
+        container.innerHTML = `
+          <div class="active-order-card">
+            <div class="active-order-header">
+              <span class="active-order-title">🛒 Active Order (${data.table === 'Takeaway' ? 'Takeaway' : 'Table ' + data.table})</span>
+              <span class="active-order-status">${data.status}</span>
+            </div>
+            <ul class="active-items-list">${itemsHtml}</ul>
+            <div style="font-size: 14px; font-weight: 700; color: #1e40af; margin-top: 4px;">Total: NPR ${data.total}</div>
+            
+            ${data.status === 'Pending' ? `
+              <div class="active-order-actions">
+                <button class="btn-edit-order" onclick="editCurrentOrder('${doc.id}')">✏️ Edit Order</button>
+                <button class="btn-cancel-order" onclick="cancelCurrentOrder('${doc.id}')">Cancel</button>
+              </div>
+            ` : `<div style="font-size: 12px; color: #64748b; margin-top: 6px;">Order is being prepared/served.</div>`}
+          </div>
+        `;
+      });
+    }
+
+    async function editCurrentOrder(orderId) {
+      const doc = await db.collection("orders").doc(orderId).get();
+      if (!doc.exists) return;
+
+      const data = doc.data();
+      cart = {};
+
+      // Load existing items back into cart
+      data.items.forEach(item => {
+        const id = getItemIdByName(item.name);
+        if (id) {
+          cart[id] = { name: item.name, price: item.price, qty: item.qty };
+        }
+      });
+
+      // Update UI to let customer modify their items
+      updateCartUI();
+      renderMenu();
+
+      const btn = document.getElementById('submit-btn');
+      btn.innerText = "Update Order";
+      
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    async function cancelCurrentOrder(orderId) {
+      if (confirm("Are you sure you want to cancel this order?")) {
+        await db.collection("orders").doc(orderId).delete();
+        localStorage.removeItem('activeOrderId');
+        activeOrderId = null;
+        document.getElementById('active-order-container').innerHTML = '';
+      }
+    }
 
     function renderMenu() {
       const container = document.getElementById('menu-container');
@@ -215,15 +313,15 @@
     async function submitOrder() {
       const selectedTableNumber = document.getElementById('table-select').value;
       
-      const confirmMsg = selectedTableNumber === 'Takeaway'
-        ? "Confirm order for Takeaway?"
-        : `Confirm order for Table #${selectedTableNumber}?`;
+      const confirmMsg = activeOrderId
+        ? "Update your existing order?"
+        : (selectedTableNumber === 'Takeaway' ? "Confirm order for Takeaway?" : `Confirm order for Table #${selectedTableNumber}?`);
 
       if (!confirm(confirmMsg)) return;
 
       const btn = document.getElementById('submit-btn');
       btn.disabled = true;
-      btn.innerText = "Placing Order...";
+      btn.innerText = activeOrderId ? "Updating..." : "Placing Order...";
 
       const orderItems = Object.values(cart).map(item => ({
         name: item.name,
@@ -235,18 +333,33 @@
       orderItems.forEach(i => total += (i.price * i.qty));
 
       try {
-        await db.collection("orders").add({
-          table: selectedTableNumber,
-          items: orderItems,
-          total: total,
-          status: "Pending",
-          timestamp: firebase.firestore.FieldValue.serverTimestamp()
-        });
+        if (activeOrderId) {
+          // Update existing order document
+          await db.collection("orders").doc(activeOrderId).update({
+            table: selectedTableNumber,
+            items: orderItems,
+            total: total,
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+          });
+          alert("Order updated successfully!");
+        } else {
+          // Create new order document
+          const docRef = await db.collection("orders").add({
+            table: selectedTableNumber,
+            items: orderItems,
+            total: total,
+            status: "Pending",
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+          });
+          activeOrderId = docRef.id;
+          localStorage.setItem('activeOrderId', activeOrderId);
+          alert("Order submitted successfully!");
+        }
 
-        alert("Order submitted successfully!");
         cart = {};
         updateCartUI();
         renderMenu();
+        listenToActiveOrder();
       } catch (err) {
         alert("Failed to send order. Please try again.");
         console.error(err);
@@ -256,7 +369,7 @@
     }
 
     renderMenu();
+    listenToActiveOrder();
   </script>
 </body>
 </html>
-
