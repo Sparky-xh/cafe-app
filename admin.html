@@ -94,11 +94,9 @@
       osc2.stop(now + 0.6);
     }
 
+    // Simplified listener (removes complex index requirement)
     db.collection("orders")
-      .where("status", "in", ["Pending", "Served"])
-      .orderBy("timestamp", "desc")
       .onSnapshot(snapshot => {
-        
         snapshot.docChanges().forEach(change => {
           if (change.type === "added" && !isInitialLoad) {
             playChime();
@@ -109,11 +107,25 @@
         
         allOrders = [];
         snapshot.forEach(doc => {
-          allOrders.push({ id: doc.id, ...doc.data() });
+          const data = doc.data();
+          // Filter active statuses in memory
+          if (data.status === "Pending" || data.status === "Served") {
+            allOrders.push({ id: doc.id, ...data });
+          }
+        });
+
+        // Sort by timestamp newest first in memory
+        allOrders.sort((a, b) => {
+          const tA = a.timestamp ? a.timestamp.toMillis() : Date.now();
+          const tB = b.timestamp ? b.timestamp.toMillis() : Date.now();
+          return tB - tA;
         });
 
         renderTableFilterBar();
         renderOrders();
+      }, err => {
+        console.error("Firestore error: ", err);
+        document.getElementById('orders-list').innerText = "Error connecting to Firebase: " + err.message;
       });
 
     function renderTableFilterBar() {
@@ -143,7 +155,7 @@
         : allOrders.filter(o => String(o.table) === String(selectedTable));
 
       if (filtered.length === 0) {
-        list.innerHTML = "<p style='margin-top:20px;'>No active orders for this view.</p>";
+        list.innerHTML = "<p style='margin-top:20px;'>No active orders.</p>";
         return;
       }
 
