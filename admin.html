@@ -7,8 +7,13 @@
   <style>
     * { box-sizing: border-box; font-family: sans-serif; margin: 0; padding: 0; }
     body { padding: 16px; background: #e9ecef; color: #333; }
-    .header-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
-    h1 { font-size: 22px; }
+    h1 { font-size: 22px; margin-bottom: 12px; }
+    
+    /* Table Navigation Bar */
+    .table-nav { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 12px; margin-bottom: 16px; }
+    .table-chip { background: white; border: 2px solid #007bff; color: #007bff; padding: 8px 16px; border-radius: 20px; font-weight: bold; cursor: pointer; white-space: nowrap; }
+    .table-chip.active { background: #007bff; color: white; }
+
     .order-card { background: white; padding: 16px; border-radius: 8px; margin-bottom: 12px; border-left: 6px solid #ffc107; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
     .order-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
     .order-time { font-size: 14px; color: #6c757d; font-weight: bold; }
@@ -26,11 +31,16 @@
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 </head>
 <body>
-  <div class="header-bar">
-    <h1>Kitchen Live Orders</h1>
-  </div>
+
+  <h1>Kitchen Live Orders</h1>
   
   <button id="audio-btn" class="enable-audio-btn" onclick="enableAudio()">🔔 Enable Sound Notifications</button>
+
+  <!-- Table Filter Bar -->
+  <div class="table-nav" id="table-filter-bar">
+    <button class="table-chip active" onclick="filterByTable('ALL')">Show All Tables</button>
+  </div>
+
   <div id="orders-list">Connecting to Firebase...</div>
 
   <script>
@@ -49,6 +59,8 @@
 
     let audioCtx = null;
     let isInitialLoad = true;
+    let allOrders = [];
+    let selectedTable = 'ALL';
 
     function enableAudio() {
       audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -83,12 +95,11 @@
       osc2.stop(now + 0.6);
     }
 
-    // Only fetch orders that are Pending or Served (ignores Archived/Deleted orders)
+    // Realtime Listener
     db.collection("orders")
       .where("status", "in", ["Pending", "Served"])
       .orderBy("timestamp", "desc")
       .onSnapshot(snapshot => {
-        const list = document.getElementById('orders-list');
         
         snapshot.docChanges().forEach(change => {
           if (change.type === "added" && !isInitialLoad) {
@@ -97,61 +108,99 @@
         });
         
         isInitialLoad = false;
-
-        if (snapshot.empty) {
-          list.innerHTML = "<p>No active orders.</p>";
-          return;
-        }
-
-        list.innerHTML = '';
+        
+        // Cache active orders
+        allOrders = [];
         snapshot.forEach(doc => {
-          const order = doc.data();
-          const id = doc.id;
-          const itemsText = order.items ? order.items.map(i => `<li>${i.name} x${i.qty}</li>`).join('') : '';
-
-          let formattedTime = "Just now";
-          if (order.timestamp) {
-            const date = order.timestamp.toDate();
-            formattedTime = date.toLocaleTimeString('en-US', {
-              timeZone: 'Asia/Kathmandu',
-              hour: '2-digit',
-              minute: '2-digit',
-              hour12: true
-            });
-          }
-
-          list.innerHTML += `
-            <div class="order-card ${order.status === 'Served' ? 'done' : ''}">
-              <div class="order-header">
-                <h3>Table #${order.table} [${order.status}]</h3>
-                <span class="order-time">🕒 ${formattedTime} NPT</span>
-              </div>
-              <ul style="margin: 8px 0 8px 20px;">${itemsText}</ul>
-              <p><strong>Total: NPR ${order.total}</strong></p>
-              
-              <div class="actions">
-                ${order.status === 'Pending' 
-                  ? `<button class="btn btn-served" onclick="markServed('${id}')">Mark as Served</button>` 
-                  : `<button class="btn btn-archive" onclick="archiveOrder('${id}')">📁 Archive</button>`
-                }
-                <button class="btn btn-danger" onclick="deleteOrder('${id}')">🗑️ Delete</button>
-              </div>
-            </div>
-          `;
+          allOrders.push({ id: doc.id, ...doc.data() });
         });
+
+        renderTableFilterBar();
+        renderOrders();
       });
 
-    // Change status to Served
+    // Render Table Buttons dynamically based on active orders
+    function renderTableFilterBar() {
+      const filterBar = document.getElementById('table-filter-bar');
+      
+      // Extract unique table numbers
+      const uniqueTables = [...new Set(allOrders.map(o => String(o.table)))].sort();
+
+      let html = `<button class="table-chip ${selectedTable === 'ALL' ? 'active' : ''}" onclick="filterByTable('ALL')">Show All</button>`;
+      
+      uniqueTables.forEach(t => {
+        html += `<button class="table-chip ${selectedTable === t ? 'active' : ''}" onclick="filterByTable('${t}')">Table #${t}</button>`;
+      });
+
+      filterBar.innerHTML = html;
+    }
+
+    // Filter Trigger
+    function filterByTable(tableNum) {
+      selectedTable = tableNum;
+      renderTableFilterBar();
+      renderOrders();
+    }
+
+    // Render Order Cards
+    function renderOrders() {
+      const list = document.getElementById('orders-list');
+      
+      // Filter orders by selection
+      const filtered = selectedTable === 'ALL' 
+        ? allOrders 
+        : allOrders.filter(o => String(o.table) === String(selectedTable));
+
+      if (filtered.length === 0) {
+        list.innerHTML = "<p style='margin-top:20px;'>No active orders for this view.</p>";
+        return;
+      }
+
+      list.innerHTML = '';
+      filtered.forEach(order => {
+        const id = order.id;
+        const itemsText = order.items ? order.items.map(i => `<li>${i.name} x${i.qty}</li>`).join('') : '';
+
+        let formattedTime = "Just now";
+        if (order.timestamp) {
+          const date = order.timestamp.toDate();
+          formattedTime = date.toLocaleTimeString('en-US', {
+            timeZone: 'Asia/Kathmandu',
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: true
+          });
+        }
+
+        list.innerHTML += `
+          <div class="order-card ${order.status === 'Served' ? 'done' : ''}">
+            <div class="order-header">
+              <h3>Table #${order.table} [${order.status}]</h3>
+              <span class="order-time">🕒 ${formattedTime} NPT</span>
+            </div>
+            <ul style="margin: 8px 0 8px 20px;">${itemsText}</ul>
+            <p><strong>Total: NPR ${order.total}</strong></p>
+            
+            <div class="actions">
+              ${order.status === 'Pending' 
+                ? `<button class="btn btn-served" onclick="markServed('${id}')">Mark as Served</button>` 
+                : `<button class="btn btn-archive" onclick="archiveOrder('${id}')">📁 Archive</button>`
+              }
+              <button class="btn btn-danger" onclick="deleteOrder('${id}')">🗑️ Delete</button>
+            </div>
+          </div>
+        `;
+      });
+    }
+
     async function markServed(id) {
       await db.collection("orders").doc(id).update({ status: "Served" });
     }
 
-    // Change status to Archived (Hides order from dashboard, keeps data in Firestore)
     async function archiveOrder(id) {
       await db.collection("orders").doc(id).update({ status: "Archived" });
     }
 
-    // Permanently remove order from Firestore
     async function deleteOrder(id) {
       if (confirm("Are you sure you want to permanently delete this order?")) {
         await db.collection("orders").doc(id).delete();
