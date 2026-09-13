@@ -3,75 +3,49 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Cafe Digital Menu</title>
+  <title>TeaToast - Digital Menu & Ordering</title>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     * { box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; margin: 0; padding: 0; }
-    body { background: #f8fafc; color: #0f172a; min-height: 100vh; padding-bottom: 120px; }
+    body { background: #f8fafc; color: #0f172a; padding-bottom: 90px; }
     
-    /* Header & Branding */
-    .header { background: #1e293b; color: white; padding: 28px 20px 24px 20px; text-align: center; border-bottom-left-radius: 20px; border-bottom-right-radius: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
-    .header h1 { font-size: 26px; font-weight: 700; letter-spacing: -0.5px; }
-    .header p { font-size: 14px; color: #94a3b8; margin-top: 4px; }
+    .header { background: white; padding: 16px 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 10; display: flex; justify-content: space-between; align-items: center; }
+    .header h1 { font-size: 20px; font-weight: 700; color: #0f172a; display: flex; align-items: center; gap: 8px; }
+    .table-badge { background: #e0f2fe; color: #0369a1; padding: 6px 12px; border-radius: 20px; font-size: 13px; font-weight: 700; }
     
-    /* Container Grid Layout */
-    .main-container { max-width: 1100px; margin: 0 auto; padding: 0 16px; }
-
-    /* Active Order Section */
-    .active-order-card { background: #eff6ff; border: 1.5px solid #3b82f6; border-radius: 16px; padding: 16px; margin-top: 16px; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(59,130,246,0.08); }
-    .active-order-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; border-bottom: 1px solid #dbeafe; padding-bottom: 6px; }
-    .active-order-title { font-weight: 700; color: #1e40af; font-size: 15px; }
-    .active-order-status { font-size: 12px; font-weight: 700; background: #dbeafe; color: #1e40af; padding: 2px 8px; border-radius: 12px; }
-    .active-items-list { list-style: none; margin: 8px 0; }
-    .active-items-list li { font-size: 14px; color: #1e3a8a; font-weight: 500; padding: 2px 0; display: flex; justify-content: space-between; }
-    .active-order-actions { display: flex; gap: 8px; margin-top: 12px; }
-    .btn-edit-order { background: #0284c7; color: white; border: none; padding: 8px 14px; border-radius: 8px; font-weight: 700; font-size: 13px; cursor: pointer; flex: 1; }
-    .btn-cancel-order { background: #ef4444; color: white; border: none; padding: 8px 14px; border-radius: 8px; font-weight: 700; font-size: 13px; cursor: pointer; }
-
-    /* Table Selector Card */
-    .table-card { background: #ffffff; padding: 16px; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); margin-top: -20px; margin-bottom: 20px; border: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center; }
-    .table-card label { font-size: 14px; color: #64748b; font-weight: 600; }
-    .table-card select { padding: 8px 14px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 15px; font-weight: 700; outline: none; background: #f8fafc; color: #0f172a; cursor: pointer; }
-
-    /* Category & Item Grid */
-    .category-title { font-size: 18px; font-weight: 700; margin: 24px 0 12px 0; color: #334155; }
-    .items-grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
+    .category-nav { display: flex; gap: 8px; overflow-x: auto; padding: 12px 20px; background: white; border-bottom: 1px solid #e2e8f0; scrollbar-width: none; }
+    .category-nav::-webkit-scrollbar { display: none; }
+    .cat-btn { background: #f1f5f9; border: none; padding: 8px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; color: #64748b; white-space: nowrap; cursor: pointer; transition: all 0.2s; }
+    .cat-btn.active { background: #0f172a; color: white; }
     
-    /* Menu Item Card */
-    .menu-item { background: white; padding: 16px; border-radius: 14px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 8px rgba(0,0,0,0.03); border: 1px solid #f1f5f9; transition: transform 0.1s ease, box-shadow 0.15s ease; }
-    .menu-item:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.06); }
-    .item-name { font-weight: 600; font-size: 15px; color: #0f172a; margin-bottom: 4px; }
-    .item-price { color: #16a34a; font-size: 14px; font-weight: 700; }
+    .container { padding: 16px 20px; max-width: 600px; margin: 0 auto; }
+    .menu-grid { display: flex; flex-direction: column; gap: 12px; }
     
-    /* Quantity Controls */
-    .qty-controls { display: flex; align-items: center; gap: 10px; background: #f1f5f9; padding: 4px 6px; border-radius: 20px; }
-    .qty-btn { width: 32px; height: 32px; border: none; background: #ffffff; border-radius: 50%; font-weight: 700; font-size: 16px; color: #0f172a; cursor: pointer; display: flex; justify-content: center; align-items: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1); transition: all 0.15s ease; }
-    .qty-btn:active { transform: scale(0.9); background: #e2e8f0; }
-    .qty-btn.minus { color: #ef4444; }
-    .qty-count { font-weight: 700; font-size: 14px; width: 16px; text-align: center; }
-
-    /* Floating Cart Bar (Mobile) */
-    .cart-bar-wrapper { position: fixed; bottom: 0; left: 0; right: 0; padding: 12px 16px 20px 16px; background: linear-gradient(to top, rgba(248,250,252,1) 75%, rgba(248,250,252,0)); z-index: 1000; }
-    .cart-bar { max-width: 500px; margin: 0 auto; background: #0f172a; color: white; padding: 12px 18px; border-radius: 16px; box-shadow: 0 10px 25px rgba(15,23,42,0.25); display: flex; justify-content: space-between; align-items: center; }
-    .cart-info-label { font-size: 11px; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; }
-    .cart-total-price { font-size: 18px; font-weight: 700; color: #4ade80; margin-top: 1px; }
+    .menu-card { background: white; border-radius: 12px; padding: 12px; display: flex; gap: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); border: 1px solid #e2e8f0; align-items: center; }
+    .menu-img { width: 75px; height: 75px; border-radius: 8px; object-fit: cover; background: #f1f5f9; flex-shrink: 0; }
+    .menu-details { flex-grow: 1; }
+    .menu-title { font-size: 15px; font-weight: 700; margin-bottom: 4px; color: #0f172a; }
+    .menu-price { font-size: 14px; font-weight: 700; color: #16a34a; }
     
-    .checkout-btn { background: #22c55e; color: white; border: none; padding: 12px 24px; border-radius: 10px; font-size: 15px; font-weight: 700; cursor: pointer; transition: all 0.2s ease; }
-    .checkout-btn:hover { background: #16a34a; }
-    .checkout-btn:disabled { background: #334155; color: #64748b; cursor: not-allowed; }
+    .add-btn { background: #0f172a; color: white; border: none; padding: 8px 14px; border-radius: 8px; font-weight: 600; font-size: 13px; cursor: pointer; transition: transform 0.1s ease; }
+    .add-btn:active { transform: scale(0.95); }
 
-    /* Desktop Responsive Layout */
-    @media (min-width: 768px) {
-      body { padding-bottom: 40px; }
-      .main-container { display: grid; grid-template-columns: 1fr 340px; gap: 24px; margin-top: 24px; }
-      .table-card { margin-top: 0; position: sticky; top: 20px; }
-      .items-grid { grid-template-columns: repeat(2, 1fr); }
-      
-      .cart-bar-wrapper { position: relative; padding: 0; background: none; }
-      .cart-bar { max-width: none; margin-top: 16px; flex-direction: column; gap: 16px; align-items: stretch; text-align: center; padding: 20px; }
-      .checkout-btn { width: 100%; padding: 14px; }
-      .desktop-sidebar { position: sticky; top: 20px; height: fit-content; }
-    }
+    .qty-controls { display: flex; align-items: center; gap: 8px; }
+    .qty-btn { background: #f1f5f9; border: 1px solid #cbd5e1; width: 28px; height: 28px; border-radius: 6px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+    .qty-count { font-size: 14px; font-weight: 700; }
+
+    /* Bottom Cart Bar */
+    .cart-bar { position: fixed; bottom: 0; left: 0; right: 0; background: white; border-top: 1px solid #e2e8f0; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 -4px 12px rgba(0,0,0,0.05); z-index: 20; display: none; }
+    .cart-info { font-size: 14px; font-weight: 600; }
+    .cart-total { font-size: 16px; font-weight: 700; color: #16a34a; }
+    .order-btn { background: #16a34a; color: white; border: none; padding: 12px 20px; border-radius: 10px; font-weight: 700; font-size: 14px; cursor: pointer; }
+
+    /* Order Confirmation Popup */
+    .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 100; padding: 20px; }
+    .modal-card { background: white; border-radius: 16px; width: 100%; max-width: 360px; padding: 24px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+    .modal-card h3 { font-size: 20px; margin-bottom: 8px; }
+    .modal-card p { font-size: 14px; color: #64748b; margin-bottom: 16px; }
+    .close-btn { background: #0f172a; color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 700; width: 100%; cursor: pointer; }
   </style>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
@@ -79,46 +53,35 @@
 <body>
 
   <div class="header">
-    <h1>Artisan Cafe</h1>
-    <p>Fresh Brews & Pastries</p>
+    <h1>🍵 TeaToast</h1>
+    <div class="table-badge" id="table-display">Loading...</div>
   </div>
 
-  <div class="main-container">
-    
-    <!-- Menu Section -->
-    <div id="menu-section">
-      <!-- Active Placed Order Card -->
-      <div id="active-order-container"></div>
-      
-      <div id="menu-container"></div>
+  <div class="category-nav" id="category-bar">
+    <button class="cat-btn active" onclick="filterCategory('All')">All Items</button>
+    <button class="cat-btn" onclick="filterCategory('Tea & Coffee')">Tea & Coffee</button>
+    <button class="cat-btn" onclick="filterCategory('Toast & Snacks')">Toast & Snacks</button>
+    <button class="cat-btn" onclick="filterCategory('Momo & Noodles')">Momo & Noodles</button>
+  </div>
+
+  <div class="container">
+    <div class="menu-grid" id="menu-container"></div>
+  </div>
+
+  <div class="cart-bar" id="cart-bar">
+    <div class="cart-info">
+      <span id="cart-count">0 items</span> • <span class="cart-total" id="cart-total">NPR 0</span>
     </div>
+    <button class="order-btn" onclick="submitOrder()">Place Order</button>
+  </div>
 
-    <!-- Desktop Sidebar / Controls -->
-    <div class="desktop-sidebar">
-      <div class="table-card">
-        <label for="table-select">📍 Dining Location</label>
-        <select id="table-select">
-          <option value="1">Table 1</option>
-          <option value="2">Table 2</option>
-          <option value="3">Table 3</option>
-          <option value="4">Table 4</option>
-          <option value="5">Table 5</option>
-          <option value="Takeaway">Takeaway</option>
-        </select>
-      </div>
-
-      <!-- Checkout Panel -->
-      <div class="cart-bar-wrapper">
-        <div class="cart-bar">
-          <div>
-            <div class="cart-info-label">Total Amount</div>
-            <div class="cart-total-price" id="total-price">NPR 0</div>
-          </div>
-          <button class="checkout-btn" id="submit-btn" onclick="submitOrder()" disabled>Place Order</button>
-        </div>
-      </div>
+  <!-- Success Modal -->
+  <div class="modal" id="success-modal">
+    <div class="modal-card">
+      <h3>🎉 Order Placed!</h3>
+      <p>Your order has been sent to the TeaToast kitchen. We will serve it to your table shortly!</p>
+      <button class="close-btn" onclick="closeModal()">Done</button>
     </div>
-
   </div>
 
   <script>
@@ -135,156 +98,79 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
-    const urlParams = new URLSearchParams(window.location.search);
-    const urlTable = urlParams.get('table');
-    const tableSelect = document.getElementById('table-select');
-    
-    if (urlTable) {
-      let optionExists = Array.from(tableSelect.options).some(opt => opt.value === urlTable);
-      if (!optionExists) {
-        tableSelect.add(new Option(`Table ${urlTable}`, urlTable));
-      }
-      tableSelect.value = urlTable;
-    }
-
-    const menuData = [
-      {
-        category: "☕ Hot Beverages",
-        items: [
-          { id: "m1", name: "Espresso", price: 120 },
-          { id: "m2", name: "Americano", price: 150 },
-          { id: "m3", name: "Cafe Latte", price: 200 },
-          { id: "m4", name: "Cappuccino", price: 220 },
-          { id: "m5", name: "Milk Tea (Chiya)", price: 50 }
-        ]
-      },
-      {
-        category: "🥤 Cold Drinks & Bakery",
-        items: [
-          { id: "m6", name: "Iced Americano", price: 180 },
-          { id: "m7", name: "Iced Latte", price: 230 },
-          { id: "m8", name: "Chocolate Donut", price: 100 },
-          { id: "m9", name: "Chicken Sandwich", price: 250 }
-        ]
-      }
+    // Menu Data
+    const menuItems = [
+      { id: 1, name: "Special Masala Tea", price: 40, category: "Tea & Coffee", img: "https://images.unsplash.com/photo-1576092768241-dec231879fc3?w=200&auto=format&fit=crop" },
+      { id: 2, name: "Milk Coffee", price: 60, category: "Tea & Coffee", img: "https://images.unsplash.com/photo-1517701604599-bb29b565090c?w=200&auto=format&fit=crop" },
+      { id: 3, name: "Butter Toast", price: 50, category: "Toast & Snacks", img: "https://images.unsplash.com/photo-1584776296944-ab6fb57b0bdd?w=200&auto=format&fit=crop" },
+      { id: 4, name: "Cheese Toast", price: 90, category: "Toast & Snacks", img: "https://images.unsplash.com/photo-1528735602780-2552fd46c7af?w=200&auto=format&fit=crop" },
+      { id: 5, name: "Veg Steam Momo", price: 120, category: "Momo & Noodles", img: "https://images.unsplash.com/photo-1625220194771-7ebdea0b70b9?w=200&auto=format&fit=crop" },
+      { id: 6, name: "Chicken Chowmein", price: 150, category: "Momo & Noodles", img: "https://images.unsplash.com/photo-1585032226651-759b368d7246?w=200&auto=format&fit=crop" }
     ];
 
     let cart = {};
-    let activeOrderId = localStorage.getItem('activeOrderId') || null;
+    let currentCategory = 'All';
+    let tableNumber = 'Takeaway';
 
-    // Helper: Map menu item name back to menu ID
-    function getItemIdByName(name) {
-      for (const cat of menuData) {
-        const found = cat.items.find(i => i.name === name);
-        if (found) return found.id;
+    // Extract Table Number from URL query parameter (e.g. ?table=4)
+    window.onload = () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const tableParam = urlParams.get('table');
+      if (tableParam) {
+        tableNumber = tableParam;
+        document.getElementById('table-display').innerText = `Table #${tableNumber}`;
+      } else {
+        document.getElementById('table-display').innerText = `🥡 Takeaway`;
       }
-      return null;
-    }
-
-    // Listen to Active Order Status from Firebase
-    function listenToActiveOrder() {
-      if (!activeOrderId) {
-        document.getElementById('active-order-container').innerHTML = '';
-        return;
-      }
-
-      db.collection("orders").doc(activeOrderId).onSnapshot(doc => {
-        const container = document.getElementById('active-order-container');
-        
-        if (!doc.exists || doc.data().status === 'Archived') {
-          localStorage.removeItem('activeOrderId');
-          activeOrderId = null;
-          container.innerHTML = '';
-          return;
-        }
-
-        const data = doc.data();
-        let itemsHtml = data.items.map(i => `<li><span>${i.name}</span> <span>x${i.qty} (NPR ${i.price * i.qty})</span></li>`).join('');
-
-        container.innerHTML = `
-          <div class="active-order-card">
-            <div class="active-order-header">
-              <span class="active-order-title">🛒 Active Order (${data.table === 'Takeaway' ? 'Takeaway' : 'Table ' + data.table})</span>
-              <span class="active-order-status">${data.status}</span>
-            </div>
-            <ul class="active-items-list">${itemsHtml}</ul>
-            <div style="font-size: 14px; font-weight: 700; color: #1e40af; margin-top: 4px;">Total: NPR ${data.total}</div>
-            
-            ${data.status === 'Pending' ? `
-              <div class="active-order-actions">
-                <button class="btn-edit-order" onclick="editCurrentOrder('${doc.id}')">✏️ Edit Order</button>
-                <button class="btn-cancel-order" onclick="cancelCurrentOrder('${doc.id}')">Cancel</button>
-              </div>
-            ` : `<div style="font-size: 12px; color: #64748b; margin-top: 6px;">Order is being prepared/served.</div>`}
-          </div>
-        `;
-      });
-    }
-
-    async function editCurrentOrder(orderId) {
-      const doc = await db.collection("orders").doc(orderId).get();
-      if (!doc.exists) return;
-
-      const data = doc.data();
-      cart = {};
-
-      // Load existing items back into cart
-      data.items.forEach(item => {
-        const id = getItemIdByName(item.name);
-        if (id) {
-          cart[id] = { name: item.name, price: item.price, qty: item.qty };
-        }
-      });
-
-      // Update UI to let customer modify their items
-      updateCartUI();
       renderMenu();
+    };
 
-      const btn = document.getElementById('submit-btn');
-      btn.innerText = "Update Order";
-      
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-
-    async function cancelCurrentOrder(orderId) {
-      if (confirm("Are you sure you want to cancel this order?")) {
-        await db.collection("orders").doc(orderId).delete();
-        localStorage.removeItem('activeOrderId');
-        activeOrderId = null;
-        document.getElementById('active-order-container').innerHTML = '';
-      }
+    function filterCategory(cat) {
+      currentCategory = cat;
+      const btns = document.querySelectorAll('.cat-btn');
+      btns.forEach(b => b.classList.remove('active'));
+      event.target.classList.add('active');
+      renderMenu();
     }
 
     function renderMenu() {
       const container = document.getElementById('menu-container');
       container.innerHTML = '';
 
-      menuData.forEach(cat => {
-        let catHtml = `<div class="category-title">${cat.category}</div><div class="items-grid">`;
-        cat.items.forEach(item => {
-          const qty = cart[item.id]?.qty || 0;
-          catHtml += `
-            <div class="menu-item">
-              <div>
-                <div class="item-name">${item.name}</div>
-                <div class="item-price">NPR ${item.price}</div>
-              </div>
-              <div class="qty-controls">
-                ${qty > 0 ? `<button class="qty-btn minus" onclick="updateQty('${item.id}', '${item.name}', ${item.price}, -1)">-</button>` : ''}
-                ${qty > 0 ? `<span class="qty-count">${qty}</span>` : ''}
-                <button class="qty-btn" onclick="updateQty('${item.id}', '${item.name}', ${item.price}, 1)">+</button>
-              </div>
+      const itemsToRender = currentCategory === 'All' 
+        ? menuItems 
+        : menuItems.filter(item => item.category === currentCategory);
+
+      itemsToRender.forEach(item => {
+        const qty = cart[item.id] ? cart[item.id].qty : 0;
+        
+        container.innerHTML += `
+          <div class="menu-card">
+            <img src="${item.img}" class="menu-img" alt="${item.name}">
+            <div class="menu-details">
+              <div class="menu-title">${item.name}</div>
+              <div class="menu-price">NPR ${item.price}</div>
             </div>
-          `;
-        });
-        catHtml += `</div>`;
-        container.innerHTML += catHtml;
+            <div>
+              ${qty === 0 ? `
+                <button class="add-btn" onclick="updateCart(${item.id}, 1)">Add +</button>
+              ` : `
+                <div class="qty-controls">
+                  <button class="qty-btn" onclick="updateCart(${item.id}, -1)">-</button>
+                  <span class="qty-count">${qty}</span>
+                  <button class="qty-btn" onclick="updateCart(${item.id}, 1)">+</button>
+                </div>
+              `}
+            </div>
+          </div>
+        `;
       });
     }
 
-    function updateQty(id, name, price, change) {
+    function updateCart(id, change) {
+      const item = menuItems.find(i => i.id === id);
       if (!cart[id]) {
-        cart[id] = { name: name, price: price, qty: 0 };
+        cart[id] = { name: item.name, price: item.price, qty: 0 };
       }
       cart[id].qty += change;
 
@@ -292,84 +178,64 @@
         delete cart[id];
       }
 
-      updateCartUI();
       renderMenu();
+      updateCartBar();
     }
 
-    function updateCartUI() {
-      let total = 0;
-      let count = 0;
+    function updateCartBar() {
+      const bar = document.getElementById('cart-bar');
+      const cartKeys = Object.keys(cart);
+      
+      if (cartKeys.length === 0) {
+        bar.style.display = 'none';
+        return;
+      }
 
-      Object.values(cart).forEach(item => {
-        total += item.price * item.qty;
-        count += item.qty;
+      bar.style.display = 'flex';
+      let totalItems = 0;
+      let totalPrice = 0;
+
+      cartKeys.forEach(key => {
+        totalItems += cart[key].qty;
+        totalPrice += cart[key].qty * cart[key].price;
       });
 
-      document.getElementById('total-price').innerText = `NPR ${total}`;
-      const btn = document.getElementById('submit-btn');
-      btn.disabled = count === 0;
+      document.getElementById('cart-count').innerText = `${totalItems} ${totalItems === 1 ? 'item' : 'items'}`;
+      document.getElementById('cart-total').innerText = `NPR ${totalPrice}`;
     }
 
     async function submitOrder() {
-      const selectedTableNumber = document.getElementById('table-select').value;
-      
-      const confirmMsg = activeOrderId
-        ? "Update your existing order?"
-        : (selectedTableNumber === 'Takeaway' ? "Confirm order for Takeaway?" : `Confirm order for Table #${selectedTableNumber}?`);
-
-      if (!confirm(confirmMsg)) return;
-
-      const btn = document.getElementById('submit-btn');
-      btn.disabled = true;
-      btn.innerText = activeOrderId ? "Updating..." : "Placing Order...";
-
-      const orderItems = Object.values(cart).map(item => ({
-        name: item.name,
-        qty: item.qty,
-        price: item.price
+      const orderItems = Object.keys(cart).map(key => ({
+        name: cart[key].name,
+        price: cart[key].price,
+        qty: cart[key].qty
       }));
 
-      let total = 0;
-      orderItems.forEach(i => total += (i.price * i.qty));
+      let totalPrice = 0;
+      orderItems.forEach(i => totalPrice += (i.price * i.qty));
 
       try {
-        if (activeOrderId) {
-          // Update existing order document
-          await db.collection("orders").doc(activeOrderId).update({
-            table: selectedTableNumber,
-            items: orderItems,
-            total: total,
-            timestamp: firebase.firestore.FieldValue.serverTimestamp()
-          });
-          alert("Order updated successfully!");
-        } else {
-          // Create new order document
-          const docRef = await db.collection("orders").add({
-            table: selectedTableNumber,
-            items: orderItems,
-            total: total,
-            status: "Pending",
-            timestamp: firebase.firestore.FieldValue.serverTimestamp()
-          });
-          activeOrderId = docRef.id;
-          localStorage.setItem('activeOrderId', activeOrderId);
-          alert("Order submitted successfully!");
-        }
+        await db.collection("orders").add({
+          table: tableNumber,
+          items: orderItems,
+          total: totalPrice,
+          status: "Pending",
+          timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        });
 
+        // Reset cart and show popup
         cart = {};
-        updateCartUI();
         renderMenu();
-        listenToActiveOrder();
+        updateCartBar();
+        document.getElementById('success-modal').style.display = 'flex';
       } catch (err) {
-        alert("Failed to send order. Please try again.");
-        console.error(err);
-      } finally {
-        btn.innerText = "Place Order";
+        alert("Error placing order: " + err.message);
       }
     }
 
-    renderMenu();
-    listenToActiveOrder();
+    function closeModal() {
+      document.getElementById('success-modal').style.display = 'none';
+    }
   </script>
 </body>
 </html>
