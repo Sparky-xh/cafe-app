@@ -11,16 +11,15 @@
     .order-card { background: white; padding: 16px; border-radius: 8px; margin-bottom: 12px; border-left: 6px solid #ffc107; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
     .done { border-left-color: #28a745; opacity: 0.6; }
     button { background: #28a745; color: white; border: none; padding: 8px 12px; border-radius: 4px; margin-top: 10px; cursor: pointer; }
-    .no-orders { background: white; padding: 20px; border-radius: 8px; text-align: center; color: #666; font-size: 16px; }
+    .enable-audio-btn { background: #007bff; font-size: 16px; padding: 10px 16px; margin-bottom: 16px; width: 100%; }
   </style>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 </head>
 <body>
-  <h1>Kitchen Incoming Orders</h1>
-  <div id="orders-list">
-    <div class="no-orders">Listening for orders...</div>
-  </div>
+  <h1>Kitchen Live Orders</h1>
+  <button id="audio-btn" class="enable-audio-btn" onclick="enableAudio()">🔔 Enable Sound Notifications</button>
+  <div id="orders-list">Connecting to Firebase...</div>
 
   <script>
     const firebaseConfig = {
@@ -36,12 +35,60 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
-    // Listen for real-time order updates
+    let audioCtx = null;
+    let isInitialLoad = true;
+
+    // Enable sound via user gesture (required by modern web browsers)
+    function enableAudio() {
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const btn = document.getElementById('audio-btn');
+      btn.innerText = "🔔 Sound Active";
+      btn.style.background = "#6c757d";
+      btn.disabled = true;
+    }
+
+    // Play a dual-tone notification chime
+    function playChime() {
+      if (!audioCtx) return;
+      
+      const now = audioCtx.currentTime;
+      const osc1 = audioCtx.createOscillator();
+      const osc2 = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+
+      osc1.type = 'sine';
+      osc2.type = 'sine';
+      osc1.frequency.setValueAtTime(587.33, now); // D5
+      osc2.frequency.setValueAtTime(880, now + 0.15); // A5
+
+      gain.gain.setValueAtTime(0.3, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.6);
+
+      osc1.connect(gain);
+      osc2.connect(gain);
+      gain.connect(audioCtx.destination);
+
+      osc1.start(now);
+      osc1.stop(now + 0.15);
+      osc2.start(now + 0.15);
+      osc2.stop(now + 0.6);
+    }
+
+    // Firestore Realtime Listener
     db.collection("orders").onSnapshot(snapshot => {
       const list = document.getElementById('orders-list');
       
+      // Play chime on incoming added documents (skipping initial page fetch)
+      snapshot.docChanges().forEach(change => {
+        if (change.type === "added" && !isInitialLoad) {
+          playChime();
+        }
+      });
+      
+      isInitialLoad = false;
+
       if (snapshot.empty) {
-        list.innerHTML = '<div class="no-orders">No active orders right now.</div>';
+        list.innerHTML = "<p>No orders yet.</p>";
         return;
       }
 
@@ -60,9 +107,6 @@
           </div>
         `;
       });
-    }, error => {
-      console.error(error);
-      document.getElementById('orders-list').innerHTML = '<div class="no-orders" style="color: red;">Error connecting to database.</div>';
     });
 
     async function markServed(id) {
