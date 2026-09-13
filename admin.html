@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Kitchen Display System</title>
+  <title>TeaToast - Kitchen Display</title>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     * { box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; margin: 0; padding: 0; }
@@ -12,8 +12,11 @@
     .header { max-width: 1200px; margin: 0 auto 20px auto; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px; }
     .header h1 { font-size: 24px; font-weight: 700; color: #0f172a; }
     
+    .header-actions { display: flex; gap: 8px; align-items: center; }
     .enable-audio-btn { background: #3b82f6; color: white; font-size: 14px; font-weight: 700; padding: 10px 16px; border: none; border-radius: 10px; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 2px 6px rgba(59,130,246,0.3); }
     .enable-audio-btn:hover { background: #2563eb; }
+    .logout-btn { background: #64748b; color: white; font-size: 14px; font-weight: 700; padding: 10px 16px; border: none; border-radius: 10px; cursor: pointer; display: none; }
+    .logout-btn:hover { background: #475569; }
 
     /* Filter Bar */
     .filter-container { max-width: 1200px; margin: 0 auto 20px auto; }
@@ -25,7 +28,6 @@
     /* Orders Grid Layout */
     .orders-grid { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: 1fr; gap: 16px; }
 
-    /* Responsive Grid for Tablets & Desktops */
     @media (min-width: 640px) {
       .orders-grid { grid-template-columns: repeat(2, 1fr); }
     }
@@ -33,7 +35,6 @@
       .orders-grid { grid-template-columns: repeat(3, 1fr); }
     }
 
-    /* Order Cards */
     .order-card { background: white; border-radius: 16px; padding: 18px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); border: 1px solid #e2e8f0; border-top: 5px solid #eab308; display: flex; flex-direction: column; justify-content: space-between; }
     .order-card.done { border-top-color: #22c55e; background: #f8fafc; opacity: 0.85; }
 
@@ -64,15 +65,49 @@
     .btn-danger:hover { background: #dc2626; }
 
     .empty-state { grid-column: 1 / -1; text-align: center; padding: 60px 20px; color: #64748b; font-size: 16px; font-weight: 500; }
+
+    /* Auth Overlay */
+    .auth-overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(4px); display: flex; justify-content: center; align-items: center; z-index: 1000; padding: 16px; }
+    .auth-card { background: white; width: 100%; max-width: 360px; padding: 24px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+    .auth-card h2 { font-size: 20px; margin-bottom: 16px; text-align: center; }
+    .auth-field { margin-bottom: 12px; }
+    .auth-field label { display: block; font-size: 12px; font-weight: 700; color: #64748b; margin-bottom: 4px; }
+    .auth-field input { width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; outline: none; }
+    .auth-field input:focus { border-color: #3b82f6; }
+    .auth-btn { width: 100%; padding: 10px; background: #0f172a; color: white; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; margin-top: 8px; }
+    .auth-error { color: #ef4444; font-size: 12px; margin-top: 8px; text-align: center; min-height: 16px; }
   </style>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
 </head>
 <body>
 
+  <!-- Authentication Modal -->
+  <div class="auth-overlay" id="auth-modal">
+    <div class="auth-card">
+      <h2>🍵 Kitchen Login</h2>
+      <form id="auth-form" onsubmit="handleLogin(event)">
+        <div class="auth-field">
+          <label for="email">Email</label>
+          <input type="email" id="email" required placeholder="admin@teatoast.com">
+        </div>
+        <div class="auth-field">
+          <label for="password">Password</label>
+          <input type="password" id="password" required placeholder="••••••••">
+        </div>
+        <button type="submit" class="auth-btn">Sign In</button>
+        <div class="auth-error" id="auth-error"></div>
+      </form>
+    </div>
+  </div>
+
   <div class="header">
-    <h1>👨‍🍳 Kitchen Orders</h1>
-    <button id="audio-btn" class="enable-audio-btn" onclick="enableAudio()">🔔 Enable Sound</button>
+    <h1>🍵 TeaToast — Kitchen</h1>
+    <div class="header-actions">
+      <button id="audio-btn" class="enable-audio-btn" onclick="enableAudio()">🔔 Enable Sound</button>
+      <button id="logout-btn" class="logout-btn" onclick="handleLogout()">Logout</button>
+    </div>
   </div>
 
   <div class="filter-container">
@@ -82,7 +117,7 @@
   </div>
 
   <div class="orders-grid" id="orders-list">
-    <div class="empty-state">Connecting to Firebase...</div>
+    <div class="empty-state">Authenticating...</div>
   </div>
 
   <script>
@@ -98,11 +133,48 @@
 
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
+    const auth = firebase.auth();
 
     let audioCtx = null;
     let isInitialLoad = true;
     let allOrders = [];
     let selectedTable = 'ALL';
+    let unsubscribeOrders = null;
+
+    // Monitor Authentication State
+    auth.onAuthStateChanged(user => {
+      const modal = document.getElementById('auth-modal');
+      const logoutBtn = document.getElementById('logout-btn');
+
+      if (user) {
+        modal.style.display = 'none';
+        logoutBtn.style.display = 'inline-block';
+        initKitchenDisplay();
+      } else {
+        modal.style.display = 'flex';
+        logoutBtn.style.display = 'none';
+        if (unsubscribeOrders) unsubscribeOrders();
+        document.getElementById('orders-list').innerHTML = `<div class="empty-state">Please log in to view orders.</div>`;
+      }
+    });
+
+    async function handleLogin(e) {
+      e.preventDefault();
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const errorDiv = document.getElementById('auth-error');
+
+      errorDiv.innerText = '';
+      try {
+        await auth.signInWithEmailAndPassword(email, password);
+      } catch (err) {
+        errorDiv.innerText = err.message;
+      }
+    }
+
+    function handleLogout() {
+      auth.signOut();
+    }
 
     function enableAudio() {
       audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -137,36 +209,39 @@
       osc2.stop(now + 0.6);
     }
 
-    db.collection("orders")
-      .onSnapshot(snapshot => {
-        snapshot.docChanges().forEach(change => {
-          if (change.type === "added" && !isInitialLoad) {
-            playChime();
-          }
-        });
-        
-        isInitialLoad = false;
-        
-        allOrders = [];
-        snapshot.forEach(doc => {
-          const data = doc.data();
-          if (data.status === "Pending" || data.status === "Served") {
-            allOrders.push({ id: doc.id, ...data });
-          }
-        });
+    function initKitchenDisplay() {
+      isInitialLoad = true;
+      unsubscribeOrders = db.collection("orders")
+        .onSnapshot(snapshot => {
+          snapshot.docChanges().forEach(change => {
+            if (change.type === "added" && !isInitialLoad) {
+              playChime();
+            }
+          });
+          
+          isInitialLoad = false;
+          
+          allOrders = [];
+          snapshot.forEach(doc => {
+            const data = doc.data();
+            if (data.status === "Pending" || data.status === "Served") {
+              allOrders.push({ id: doc.id, ...data });
+            }
+          });
 
-        allOrders.sort((a, b) => {
-          const tA = a.timestamp ? a.timestamp.toMillis() : Date.now();
-          const tB = b.timestamp ? b.timestamp.toMillis() : Date.now();
-          return tB - tA;
-        });
+          allOrders.sort((a, b) => {
+            const tA = a.timestamp ? a.timestamp.toMillis() : Date.now();
+            const tB = b.timestamp ? b.timestamp.toMillis() : Date.now();
+            return tB - tA;
+          });
 
-        renderTableFilterBar();
-        renderOrders();
-      }, err => {
-        console.error("Firestore error: ", err);
-        document.getElementById('orders-list').innerHTML = `<div class="empty-state">Error connecting: ${err.message}</div>`;
-      });
+          renderTableFilterBar();
+          renderOrders();
+        }, err => {
+          console.error("Firestore error: ", err);
+          document.getElementById('orders-list').innerHTML = `<div class="empty-state">Error connecting: ${err.message}</div>`;
+        });
+    }
 
     function renderTableFilterBar() {
       const filterBar = document.getElementById('table-filter-bar');
@@ -195,7 +270,7 @@
         : allOrders.filter(o => String(o.table) === String(selectedTable));
 
       if (filtered.length === 0) {
-        list.innerHTML = `<div class="empty-state">No active orders right now ☕</div>`;
+        list.innerHTML = `<div class="empty-state">No active orders right now 🍵</div>`;
         return;
       }
 
