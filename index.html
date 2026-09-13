@@ -9,7 +9,8 @@
     body { padding: 16px; background: #f8f9fa; color: #333; padding-bottom: 90px; }
     
     .header { text-align: center; margin-bottom: 20px; }
-    .table-badge { background: #007bff; color: white; padding: 4px 12px; border-radius: 20px; font-size: 14px; display: inline-block; margin-top: 6px; }
+    .table-selector { margin-top: 12px; background: #e2e8f0; padding: 10px; border-radius: 8px; display: inline-block; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+    select { padding: 6px 12px; border-radius: 4px; border: 1px solid #ccc; font-size: 16px; font-weight: bold; outline: none; }
     
     .category-title { font-size: 18px; margin: 16px 0 10px 0; border-bottom: 2px solid #ddd; padding-bottom: 4px; color: #495057; }
     
@@ -22,7 +23,7 @@
     .qty-btn:active { background: #ced4da; }
     
     .cart-bar { position: fixed; bottom: 0; left: 0; right: 0; background: white; padding: 16px; box-shadow: 0 -2px 10px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; }
-    .checkout-btn { background: #28a745; color: white; border: none; padding: 12px 24px; border-radius: 6px; font-size: 16px; font-weight: bold; cursor: pointer; }
+    .checkout-btn { background: #28a745; color: white; border: none; padding: 12px 24px; border-radius: 6px; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.2s; }
     .checkout-btn:disabled { background: #6c757d; cursor: not-allowed; }
   </style>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
@@ -32,7 +33,17 @@
 
   <div class="header">
     <h1>Welcome to Our Cafe</h1>
-    <span class="table-badge" id="table-display">Detecting Table...</span>
+    <div class="table-selector">
+      <label for="table-select"><strong>Ordering for: </strong></label>
+      <select id="table-select">
+        <option value="Takeaway">Takeaway</option>
+        <option value="1">Table 1</option>
+        <option value="2">Table 2</option>
+        <option value="3">Table 3</option>
+        <option value="4">Table 4</option>
+        <option value="5">Table 5</option>
+      </select>
+    </div>
   </div>
 
   <div id="menu-container"></div>
@@ -59,12 +70,18 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
-    // Detect table number from URL (e.g., ?table=2)
     const urlParams = new URLSearchParams(window.location.search);
-    const tableNumber = urlParams.get('table') || 'Takeaway / Unknown';
-    document.getElementById('table-display').innerText = `Table #${tableNumber}`;
+    const urlTable = urlParams.get('table');
+    const tableSelect = document.getElementById('table-select');
+    
+    if (urlTable) {
+      let optionExists = Array.from(tableSelect.options).some(opt => opt.value === urlTable);
+      if (!optionExists) {
+        tableSelect.add(new Option(`Table ${urlTable}`, urlTable));
+      }
+      tableSelect.value = urlTable;
+    }
 
-    // Cafe Menu Items
     const menuData = [
       {
         category: "☕ Hot Beverages",
@@ -143,6 +160,16 @@
     }
 
     async function submitOrder() {
+      const selectedTableNumber = document.getElementById('table-select').value;
+      
+      const confirmMsg = selectedTableNumber === 'Takeaway'
+        ? "Confirm order for Takeaway?"
+        : `Confirm order for Table #${selectedTableNumber}?`;
+
+      if (!confirm(confirmMsg)) {
+        return;
+      }
+
       const btn = document.getElementById('submit-btn');
       btn.disabled = true;
       btn.innerText = "Placing Order...";
@@ -158,14 +185,14 @@
 
       try {
         await db.collection("orders").add({
-          table: tableNumber,
+          table: selectedTableNumber,
           items: orderItems,
           total: total,
           status: "Pending",
           timestamp: firebase.firestore.FieldValue.serverTimestamp()
         });
 
-        alert("Order sent to kitchen!");
+        alert("Order submitted successfully!");
         cart = {};
         updateCartUI();
         renderMenu();
@@ -177,7 +204,6 @@
       }
     }
 
-    // Initial render
     renderMenu();
   </script>
 </body>
