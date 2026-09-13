@@ -27,8 +27,6 @@
     .header-actions { display: flex; gap: 10px; align-items: center; }
     .enable-audio-btn { background: #2563eb; color: white; font-size: 13px; font-weight: 700; padding: 10px 16px; border: none; border-radius: 10px; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 12px rgba(37,99,235,0.25); }
     .enable-audio-btn:hover { background: #1d4ed8; }
-    .logout-btn { background: #f1f5f9; color: #64748b; font-size: 13px; font-weight: 700; padding: 10px 16px; border: 1px solid #cbd5e1; border-radius: 10px; cursor: pointer; display: none; transition: all 0.2s; }
-    .logout-btn:hover { background: #e2e8f0; color: #334155; }
 
     /* Summary Metrics Bar */
     .metrics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px; }
@@ -90,20 +88,6 @@
     .empty-title { font-size: 18px; font-weight: 800; color: #0f172a; margin-bottom: 6px; }
     .empty-subtitle { font-size: 14px; color: #64748b; max-width: 320px; margin: 0 auto; }
 
-    /* Auth Overlay */
-    .auth-overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(4px); display: flex; justify-content: center; align-items: center; z-index: 1000; padding: 16px; }
-    .auth-card { background: white; width: 100%; max-width: 360px; padding: 24px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
-    .auth-card h2 { font-size: 20px; margin-bottom: 16px; text-align: center; font-weight: 800; }
-    .auth-field { margin-bottom: 12px; }
-    .auth-field label { display: block; font-size: 12px; font-weight: 700; color: #64748b; margin-bottom: 4px; }
-    .auth-field input { width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; outline: none; }
-    .auth-field input:focus { border-color: #3b82f6; }
-    .auth-btn { width: 100%; padding: 10px; background: #0f172a; color: white; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; margin-top: 8px; }
-    .link-btn { width: 100%; padding: 10px; background: #f1f5f9; color: #334155; border: 1px solid #cbd5e1; border-radius: 8px; font-weight: 700; cursor: pointer; margin-top: 8px; }
-    .auth-divider { text-align: center; font-size: 12px; color: #94a3b8; margin: 12px 0; font-weight: 600; }
-    .auth-error { color: #ef4444; font-size: 12px; margin-top: 8px; text-align: center; min-height: 16px; }
-    .auth-success { color: #16a34a; font-size: 12px; margin-top: 8px; text-align: center; min-height: 16px; }
-
     #print-area { display: none; }
 
     /* Thermal Print Rules */
@@ -125,35 +109,10 @@
   </style>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
 </head>
 <body>
 
   <div id="print-area"></div>
-
-  <!-- Authentication Modal -->
-  <div class="auth-overlay" id="auth-modal">
-    <div class="auth-card">
-      <h2>🍵 Kitchen Login</h2>
-      <form id="auth-form" onsubmit="handlePasswordLogin(event)">
-        <div class="auth-field">
-          <label for="email">Email</label>
-          <input type="email" id="email" required placeholder="admin@teatoast.com">
-        </div>
-        <div class="auth-field">
-          <label for="password">Password</label>
-          <input type="password" id="password" placeholder="••••••••">
-        </div>
-        
-        <button type="submit" class="auth-btn">Sign In with Password</button>
-        <div class="auth-divider">OR</div>
-        <button type="button" class="link-btn" onclick="handleMagicLinkLogin()">✨ Send Magic Email Link</button>
-        
-        <div class="auth-error" id="auth-error"></div>
-        <div class="auth-success" id="auth-success"></div>
-      </form>
-    </div>
-  </div>
 
   <div class="dashboard-container">
     
@@ -165,7 +124,6 @@
       </div>
       <div class="header-actions">
         <button id="audio-btn" class="enable-audio-btn" onclick="enableAudio()">🔔 Enable Sound</button>
-        <button id="logout-btn" class="logout-btn" onclick="handleLogout()">Logout</button>
       </div>
     </div>
 
@@ -224,66 +182,15 @@
 
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
-    const auth = firebase.auth();
 
     let audioCtx = null;
     let isInitialLoad = true;
     let allOrders = [];
     let selectedTable = 'ALL';
-    let unsubscribeOrders = null;
 
-    window.addEventListener('load', async () => {
-      if (auth.isSignInWithEmailLink(window.location.href)) {
-        let email = window.localStorage.getItem('emailForSignIn');
-        if (!email) email = window.prompt('Please confirm your email for sign-in:');
-        try {
-          await auth.signInWithEmailLink(email, window.location.href);
-          window.localStorage.removeItem('emailForSignIn');
-        } catch (err) {
-          document.getElementById('auth-error').innerText = err.message;
-        }
-      }
+    window.addEventListener('load', () => {
+      initKitchenDisplay();
     });
-
-    auth.onAuthStateChanged(user => {
-      const modal = document.getElementById('auth-modal');
-      const logoutBtn = document.getElementById('logout-btn');
-
-      if (user) {
-        modal.style.display = 'none';
-        logoutBtn.style.display = 'inline-block';
-        initKitchenDisplay();
-      } else {
-        modal.style.display = 'flex';
-        logoutBtn.style.display = 'none';
-        if (unsubscribeOrders) unsubscribeOrders();
-      }
-    });
-
-    async function handlePasswordLogin(e) {
-      e.preventDefault();
-      const email = document.getElementById('email').value;
-      const password = document.getElementById('password').value;
-      try {
-        await auth.signInWithEmailAndPassword(email, password);
-      } catch (err) {
-        document.getElementById('auth-error').innerText = err.message;
-      }
-    }
-
-    async function handleMagicLinkLogin() {
-      const email = document.getElementById('email').value;
-      if (!email) return alert("Please enter email first");
-      try {
-        await auth.sendSignInLinkToEmail(email, { url: window.location.href, handleCodeInApp: true });
-        window.localStorage.setItem('emailForSignIn', email);
-        document.getElementById('auth-success').innerText = "✨ Magic link sent to your email!";
-      } catch (err) {
-        document.getElementById('auth-error').innerText = err.message;
-      }
-    }
-
-    function handleLogout() { auth.signOut(); }
 
     function enableAudio() {
       audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -315,31 +222,30 @@
 
     function initKitchenDisplay() {
       isInitialLoad = true;
-      unsubscribeOrders = db.collection("orders")
-        .onSnapshot(snapshot => {
-          snapshot.docChanges().forEach(change => {
-            if (change.type === "added" && !isInitialLoad) playChime();
-          });
-          
-          isInitialLoad = false;
-          allOrders = [];
-          snapshot.forEach(doc => {
-            const data = doc.data();
-            if (data.status === "Pending" || data.status === "Served") {
-              allOrders.push({ id: doc.id, ...data });
-            }
-          });
-
-          allOrders.sort((a, b) => {
-            const tA = a.timestamp ? a.timestamp.toMillis() : Date.now();
-            const tB = b.timestamp ? b.timestamp.toMillis() : Date.now();
-            return tB - tA;
-          });
-
-          updateMetrics();
-          renderTableFilterBar();
-          renderOrders();
+      db.collection("orders").onSnapshot(snapshot => {
+        snapshot.docChanges().forEach(change => {
+          if (change.type === "added" && !isInitialLoad) playChime();
         });
+        
+        isInitialLoad = false;
+        allOrders = [];
+        snapshot.forEach(doc => {
+          const data = doc.data();
+          if (data.status === "Pending" || data.status === "Served") {
+            allOrders.push({ id: doc.id, ...data });
+          }
+        });
+
+        allOrders.sort((a, b) => {
+          const tA = a.timestamp ? a.timestamp.toMillis() : Date.now();
+          const tB = b.timestamp ? b.timestamp.toMillis() : Date.now();
+          return tB - tA;
+        });
+
+        updateMetrics();
+        renderTableFilterBar();
+        renderOrders();
+      });
     }
 
     function updateMetrics() {
@@ -399,4 +305,58 @@
                 <span class="table-badge">${order.table === 'Takeaway' ? '🥡 Takeaway' : '🪑 Table ' + order.table}</span>
                 <span class="order-status">${order.status}</span>
               </div>
-              <div class="order-time">
+              <div class="order-time">🕒 ${formattedTime}</div>
+              <ul class="items-list">${itemsText}</ul>
+            </div>
+            <div class="order-footer">
+              <div class="order-total">Total: NPR ${order.total}</div>
+              <div class="actions">
+                ${order.status === 'Pending' 
+                  ? `<button class="btn btn-served" onclick="markServed('${id}')">Served</button>` 
+                  : `<button class="btn btn-archive" onclick="archiveOrder('${id}')">Archive</button>`
+                }
+                <button class="btn btn-print" onclick="printReceipt('${id}')">🖨️ Ticket</button>
+                <button class="btn btn-edit" onclick="editTableNumber('${id}', '${order.table}')">✏️</button>
+                <button class="btn btn-danger" onclick="deleteOrder('${id}')">🗑️</button>
+              </div>
+            </div>
+          </div>
+        `;
+      });
+    }
+
+    function printReceipt(id) {
+      const order = allOrders.find(o => o.id === id);
+      if (!order) return;
+      let formattedTime = order.timestamp ? order.timestamp.toDate().toLocaleTimeString('en-US', { timeZone: 'Asia/Kathmandu', hour: '2-digit', minute: '2-digit', hour12: true }) : "Just now";
+      let itemsRows = order.items ? order.items.map(item => `<tr><td>${item.name}</td><td class="qty">x${item.qty}</td></tr>`).join('') : '';
+
+      document.getElementById('print-area').innerHTML = `
+        <div class="ticket-title">TeaToast</div>
+        <div class="ticket-sub">KITCHEN TICKET</div>
+        <div class="ticket-table">${order.table === 'Takeaway' ? 'TAKEAWAY ORDER' : 'TABLE #' + order.table}</div>
+        <div class="ticket-time">Time: ${formattedTime}</div>
+        <table class="ticket-items"><tbody>${itemsRows}</tbody></table>
+        <div class="ticket-divider"></div>
+        <div class="ticket-total">TOTAL: NPR ${order.total}</div>
+        <div class="ticket-footer">--- Order ID: ${id.substring(0, 8)} ---</div>
+      `;
+      window.print();
+    }
+
+    async function markServed(id) { await db.collection("orders").doc(id).update({ status: "Served" }); }
+    async function archiveOrder(id) { await db.collection("orders").doc(id).update({ status: "Archived" }); }
+    async function editTableNumber(id, currentTable) {
+      const newTable = prompt("Enter correct Table Number or 'Takeaway':", currentTable);
+      if (newTable && newTable.trim() !== "" && newTable !== currentTable) {
+        await db.collection("orders").doc(id).update({ table: newTable.trim() });
+      }
+    }
+    async function deleteOrder(id) {
+      if (confirm("Are you sure you want to delete this order?")) {
+        await db.collection("orders").doc(id).delete();
+      }
+    }
+  </script>
+</body>
+</html>
