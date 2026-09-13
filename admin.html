@@ -61,6 +61,8 @@
     .btn-archive:hover { background: #475569; }
     .btn-edit { background: #0284c7; color: white; flex: none; }
     .btn-edit:hover { background: #0369a1; }
+    .btn-print { background: #8b5cf6; color: white; flex: none; }
+    .btn-print:hover { background: #7c3aed; }
     .btn-danger { background: #ef4444; color: white; flex: none; }
     .btn-danger:hover { background: #dc2626; }
 
@@ -75,7 +77,41 @@
     .auth-field input { width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; outline: none; }
     .auth-field input:focus { border-color: #3b82f6; }
     .auth-btn { width: 100%; padding: 10px; background: #0f172a; color: white; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; margin-top: 8px; }
+    .link-btn { width: 100%; padding: 10px; background: #f1f5f9; color: #334155; border: 1px solid #cbd5e1; border-radius: 8px; font-weight: 700; cursor: pointer; margin-top: 8px; }
+    .auth-divider { text-align: center; font-size: 12px; color: #94a3b8; margin: 12px 0; font-weight: 600; }
     .auth-error { color: #ef4444; font-size: 12px; margin-top: 8px; text-align: center; min-height: 16px; }
+    .auth-success { color: #16a34a; font-size: 12px; margin-top: 8px; text-align: center; min-height: 16px; }
+
+    /* Hidden Thermal Receipt Area (Visible only on print) */
+    #print-area { display: none; }
+
+    /* THERMAL RECEIPT PRINT STYLES (80mm Thermal Printer) */
+    @media print {
+      body * { visibility: hidden; }
+      #print-area, #print-area * { visibility: visible; }
+      #print-area {
+        display: block !important;
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 72mm; /* Standard printable area for 80mm thermal rolls */
+        font-family: 'Courier New', Courier, monospace;
+        color: #000;
+        background: #fff;
+        padding: 0;
+        margin: 0;
+      }
+      .ticket-title { font-size: 20px; font-weight: bold; text-align: center; text-transform: uppercase; margin-bottom: 4px; }
+      .ticket-sub { font-size: 12px; text-align: center; border-bottom: 1px dashed #000; padding-bottom: 6px; margin-bottom: 8px; }
+      .ticket-table { font-size: 18px; font-weight: bold; margin-bottom: 4px; }
+      .ticket-time { font-size: 12px; border-bottom: 1px solid #000; padding-bottom: 6px; margin-bottom: 8px; }
+      .ticket-items { width: 100%; border-collapse: collapse; margin-bottom: 8px; }
+      .ticket-items td { font-size: 14px; font-weight: bold; padding: 4px 0; vertical-align: top; }
+      .ticket-items td.qty { text-align: right; width: 40px; }
+      .ticket-divider { border-bottom: 1px dashed #000; margin: 8px 0; }
+      .ticket-total { font-size: 16px; font-weight: bold; text-align: right; margin-top: 6px; }
+      .ticket-footer { text-align: center; font-size: 11px; margin-top: 12px; font-style: italic; }
+    }
   </style>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
@@ -83,21 +119,31 @@
 </head>
 <body>
 
+  <!-- Hidden container for printing thermal tickets -->
+  <div id="print-area"></div>
+
   <!-- Authentication Modal -->
   <div class="auth-overlay" id="auth-modal">
     <div class="auth-card">
       <h2>🍵 Kitchen Login</h2>
-      <form id="auth-form" onsubmit="handleLogin(event)">
+      <form id="auth-form" onsubmit="handlePasswordLogin(event)">
         <div class="auth-field">
           <label for="email">Email</label>
           <input type="email" id="email" required placeholder="admin@teatoast.com">
         </div>
         <div class="auth-field">
           <label for="password">Password</label>
-          <input type="password" id="password" required placeholder="••••••••">
+          <input type="password" id="password" placeholder="••••••••">
         </div>
-        <button type="submit" class="auth-btn">Sign In</button>
+        
+        <button type="submit" class="auth-btn">Sign In with Password</button>
+        
+        <div class="auth-divider">OR</div>
+        
+        <button type="button" class="link-btn" onclick="handleMagicLinkLogin()">✨ Send Magic Email Link</button>
+        
         <div class="auth-error" id="auth-error"></div>
+        <div class="auth-success" id="auth-success"></div>
       </form>
     </div>
   </div>
@@ -141,6 +187,22 @@
     let selectedTable = 'ALL';
     let unsubscribeOrders = null;
 
+    // Check for Magic Link completion on page load
+    window.addEventListener('load', async () => {
+      if (auth.isSignInWithEmailLink(window.location.href)) {
+        let email = window.localStorage.getItem('emailForSignIn');
+        if (!email) {
+          email = window.prompt('Please confirm your email for sign-in:');
+        }
+        try {
+          await auth.signInWithEmailLink(email, window.location.href);
+          window.localStorage.removeItem('emailForSignIn');
+        } catch (err) {
+          document.getElementById('auth-error').innerText = err.message;
+        }
+      }
+    });
+
     // Monitor Authentication State
     auth.onAuthStateChanged(user => {
       const modal = document.getElementById('auth-modal');
@@ -158,15 +220,52 @@
       }
     });
 
-    async function handleLogin(e) {
+    // Method 1: Password Sign-In
+    async function handlePasswordLogin(e) {
       e.preventDefault();
       const email = document.getElementById('email').value;
       const password = document.getElementById('password').value;
       const errorDiv = document.getElementById('auth-error');
+      const successDiv = document.getElementById('auth-success');
 
       errorDiv.innerText = '';
+      successDiv.innerText = '';
+
+      if (!password) {
+        errorDiv.innerText = "Please enter a password or use Magic Link.";
+        return;
+      }
+
       try {
         await auth.signInWithEmailAndPassword(email, password);
+      } catch (err) {
+        errorDiv.innerText = err.message;
+      }
+    }
+
+    // Method 2: Passwordless Magic Link Sign-In
+    async function handleMagicLinkLogin() {
+      const email = document.getElementById('email').value;
+      const errorDiv = document.getElementById('auth-error');
+      const successDiv = document.getElementById('auth-success');
+
+      errorDiv.innerText = '';
+      successDiv.innerText = '';
+
+      if (!email) {
+        errorDiv.innerText = "Please enter your email address first.";
+        return;
+      }
+
+      const actionCodeSettings = {
+        url: window.location.href,
+        handleCodeInApp: true
+      };
+
+      try {
+        await auth.sendSignInLinkToEmail(email, actionCodeSettings);
+        window.localStorage.setItem('emailForSignIn', email);
+        successDiv.innerText = "✨ Magic link sent! Check your email inbox.";
       } catch (err) {
         errorDiv.innerText = err.message;
       }
@@ -311,13 +410,63 @@
                   ? `<button class="btn btn-served" onclick="markServed('${id}')">Served</button>` 
                   : `<button class="btn btn-archive" onclick="archiveOrder('${id}')">Archive</button>`
                 }
-                <button class="btn btn-edit" onclick="editTableNumber('${id}', '${order.table}')">✏️ Edit</button>
+                <button class="btn btn-print" onclick="printReceipt('${id}')">🖨️ Ticket</button>
+                <button class="btn btn-edit" onclick="editTableNumber('${id}', '${order.table}')">✏️</button>
                 <button class="btn btn-danger" onclick="deleteOrder('${id}')">🗑️</button>
               </div>
             </div>
           </div>
         `;
       });
+    }
+
+    // Function to generate ticket & launch browser print dialog
+    function printReceipt(id) {
+      const order = allOrders.find(o => o.id === id);
+      if (!order) return;
+
+      let formattedTime = "Just now";
+      if (order.timestamp) {
+        const date = order.timestamp.toDate();
+        formattedTime = date.toLocaleTimeString('en-US', {
+          timeZone: 'Asia/Kathmandu',
+          hour: '2-digit',
+          minute: '2-digit',
+          hour12: true
+        });
+      }
+
+      let itemsRows = '';
+      if (order.items) {
+        order.items.forEach(item => {
+          itemsRows += `
+            <tr>
+              <td>${item.name}</td>
+              <td class="qty">x${item.qty}</td>
+            </tr>
+          `;
+        });
+      }
+
+      const ticketHTML = `
+        <div class="ticket-title">TeaToast</div>
+        <div class="ticket-sub">KITCHEN TICKET</div>
+        <div class="ticket-table">${order.table === 'Takeaway' ? 'TAKEAWAY ORDER' : 'TABLE #' + order.table}</div>
+        <div class="ticket-time">Time: ${formattedTime}</div>
+        
+        <table class="ticket-items">
+          <tbody>
+            ${itemsRows}
+          </tbody>
+        </table>
+        
+        <div class="ticket-divider"></div>
+        <div class="ticket-total">TOTAL: NPR ${order.total}</div>
+        <div class="ticket-footer">--- Order ID: ${id.substring(0, 8)} ---</div>
+      `;
+
+      document.getElementById('print-area').innerHTML = ticketHTML;
+      window.print();
     }
 
     async function markServed(id) {
