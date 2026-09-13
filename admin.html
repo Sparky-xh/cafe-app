@@ -212,8 +212,9 @@
     <!-- Orders Grid -->
     <div class="orders-grid" id="orders-list">
       <div class="empty-state">
-        <div class="empty-icon">⏳</div>
-        <div class="empty-title">Connecting to Firestore...</div>
+        <div class="empty-icon" id="status-icon">⏳</div>
+        <div class="empty-title" id="status-title">Connecting to Firestore...</div>
+        <div class="empty-subtitle" id="status-subtitle">Please check your internet connection or browser settings.</div>
       </div>
     </div>
 
@@ -239,7 +240,7 @@
     let activeOrders = [];
     let archivedOrders = [];
     let selectedTable = 'ALL';
-    let selectedStatus = 'ALL'; // 'ALL', 'Pending', or 'Served'
+    let selectedStatus = 'ALL';
 
     window.addEventListener('load', () => {
       initKitchenDisplay();
@@ -304,6 +305,15 @@
         renderTableFilterBar();
         renderOrders();
         renderArchivedTable();
+      }, error => {
+        console.error("Firestore Error:", error);
+        document.getElementById('orders-list').innerHTML = `
+          <div class="empty-state">
+            <div class="empty-icon">⚠️</div>
+            <div class="empty-title">Connection Failed</div>
+            <div class="empty-subtitle" style="color: #ef4444; font-weight: 600; margin-top: 8px;">${error.message}</div>
+          </div>
+        `;
       });
     }
 
@@ -319,7 +329,7 @@
 
     function filterByStatus(status) {
       if (selectedStatus === status) {
-        selectedStatus = 'ALL'; // Toggle off if clicked again
+        selectedStatus = 'ALL';
       } else {
         selectedStatus = status;
       }
@@ -353,7 +363,6 @@
 
     function renderTableFilterBar() {
       const filterBar = document.getElementById('table-filter-bar');
-      // Limit table filtering subset based on selected status filter if active
       const sourceList = selectedStatus === 'ALL' ? activeOrders : activeOrders.filter(o => o.status === selectedStatus);
       const uniqueTables = [...new Set(sourceList.map(o => String(o.table)))].sort();
       
@@ -373,7 +382,6 @@
     function renderOrders() {
       const list = document.getElementById('orders-list');
       
-      // Filter by status first, then by table
       let filtered = activeOrders;
       if (selectedStatus !== 'ALL') {
         filtered = filtered.filter(o => o.status === selectedStatus);
@@ -387,16 +395,4 @@
           <div class="empty-state">
             <div class="empty-icon">🍵</div>
             <div class="empty-title">No Orders Found</div>
-            <div class="empty-subtitle">There are no orders matching your current filters.</div>
-          </div>
-        `;
-        return;
-      }
-
-      list.innerHTML = '';
-      filtered.forEach(order => {
-        const id = order.id;
-        const itemsText = order.items ? order.items.map(i => `<li><span>${i.name}</span> <span class="qty">x${i.qty}</span></li>`).join('') : '';
-        let formattedTime = "Just now";
-        if (order.timestamp) {
-     
+            <div class="empty-subtitle">There are no orders matching your
