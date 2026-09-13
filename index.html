@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cafe Menu</title>
+  <style>
+    * { box-sizing: border-box; font-family: sans-serif; margin: 0; padding: 0; }
+    body { padding: 16px; background: #f8f9fa; color: #333; }
+    .card { background: white; padding: 16px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 16px; }
+    .item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+    button { background: #007bff; color: white; border: none; padding: 8px 14px; border-radius: 4px; cursor: pointer; }
+    button:disabled { background: #ccc; }
+  </style>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+</head>
+<body>
+  <div class="card">
+    <h2 id="table-display">Table Number</h2>
+  </div>
+
+  <div class="card">
+    <h3>Menu</h3>
+    <br>
+    <div class="item">
+      <span><strong>Iced Americano</strong> - NPR 250</span>
+      <button onclick="addToCart('Iced Americano', 250)">Add</button>
+    </div>
+    <div class="item">
+      <span><strong>Cafe Latte</strong> - NPR 280</span>
+      <button onclick="addToCart('Cafe Latte', 280)">Add</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Your Order</h3>
+    <ul id="cart-list" style="margin: 12px 0; list-style-position: inside;"></ul>
+    <p><strong>Total: NPR <span id="total">0</span></strong></p>
+    <button id="order-btn" style="width: 100%; margin-top: 12px; padding: 12px; font-size: 16px;" onclick="placeOrder()" disabled>Submit Order</button>
+  </div>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyC616K7b9vsNDcuVrXQpDYOS2L9h1OpxIw",
+      authDomain: "my-cafe12.firebaseapp.com",
+      projectId: "my-cafe12",
+      storageBucket: "my-cafe12.firebasestorage.app",
+      messagingSenderId: "621111977103",
+      appId: "1:621111977103:web:0246bb820fa55f90a9fcfa",
+      measurementId: "G-CM63Q78KHP"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const tableNumber = urlParams.get('table') || '1';
+    document.getElementById('table-display').innerText = `Table #${tableNumber}`;
+
+    let cart = [];
+
+    function addToCart(name, price) {
+      const existing = cart.find(i => i.name === name);
+      if (existing) existing.qty += 1;
+      else cart.push({ name, price, qty: 1 });
+      renderCart();
+    }
+
+    function renderCart() {
+      const list = document.getElementById('cart-list');
+      list.innerHTML = '';
+      let sum = 0;
+      cart.forEach(item => {
+        sum += item.price * item.qty;
+        list.innerHTML += `<li>${item.name} x${item.qty} - NPR ${item.price * item.qty}</li>`;
+      });
+      document.getElementById('total').innerText = sum;
+      document.getElementById('order-btn').disabled = cart.length === 0;
+    }
+
+    async function placeOrder() {
+      const total = cart.reduce((s, i) => s + (i.price * i.qty), 0);
+      try {
+        await db.collection("orders").add({
+          table: tableNumber,
+          items: cart,
+          total: total,
+          status: "Pending",
+          timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        alert("Order sent to kitchen!");
+        cart = [];
+        renderCart();
+      } catch (e) {
+        console.error(e);
+        alert("Failed to send order. Check database rules.");
+      }
+    }
+  </script>
+</body>
+</html>
+
