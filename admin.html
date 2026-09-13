@@ -176,7 +176,7 @@
       </div>
     </div>
 
-    <!-- Real-time Stats Header (Clickable Pending & Served cards) -->
+    <!-- Real-time Stats Header -->
     <div class="metrics-grid">
       <div class="metric-card interactive" id="card-pending" onclick="filterByStatus('Pending')">
         <div>
@@ -274,6 +274,19 @@
       osc2.start(now + 0.15); osc2.stop(now + 0.6);
     }
 
+    // Safe timestamp helper functions to prevent crash if timestamp is null or missing
+    function getMillis(ts) {
+      if (ts && typeof ts.toMillis === 'function') return ts.toMillis();
+      return Date.now();
+    }
+
+    function getTimeString(ts) {
+      if (ts && typeof ts.toDate === 'function') {
+        return ts.toDate().toLocaleTimeString('en-US', { timeZone: 'Asia/Kathmandu', hour: '2-digit', minute: '2-digit', hour12: true });
+      }
+      return "Just now";
+    }
+
     function initKitchenDisplay() {
       isInitialLoad = true;
       db.collection("orders").onSnapshot(snapshot => {
@@ -298,8 +311,8 @@
           }
         });
 
-        activeOrders.sort((a, b) => (b.timestamp?.toMillis() || Date.now()) - (a.timestamp?.toMillis() || Date.now()));
-        archivedOrders.sort((a, b) => (b.timestamp?.toMillis() || Date.now()) - (a.timestamp?.toMillis() || Date.now()));
+        activeOrders.sort((a, b) => getMillis(b.timestamp) - getMillis(a.timestamp));
+        archivedOrders.sort((a, b) => getMillis(b.timestamp) - getMillis(a.timestamp));
 
         updateMetrics();
         renderTableFilterBar();
@@ -386,13 +399,4 @@
       if (selectedStatus !== 'ALL') {
         filtered = filtered.filter(o => o.status === selectedStatus);
       }
-      if (selectedTable !== 'ALL') {
-        filtered = filtered.filter(o => String(o.table) === String(selectedTable));
-      }
-
-      if (filtered.length === 0) {
-        list.innerHTML = `
-          <div class="empty-state">
-            <div class="empty-icon">🍵</div>
-            <div class="empty-title">No Orders Found</div>
-            <div class="empty-subtitle">There are no orders matching your
+      if (selectedTable 
