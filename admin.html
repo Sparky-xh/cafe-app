@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kitchen Display</title>
+  <style>
+    * { box-sizing: border-box; font-family: sans-serif; margin: 0; padding: 0; }
+    body { padding: 16px; background: #e9ecef; color: #333; }
+    h1 { margin-bottom: 16px; }
+    .order-card { background: white; padding: 16px; border-radius: 8px; margin-bottom: 12px; border-left: 6px solid #ffc107; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+    .done { border-left-color: #28a745; opacity: 0.6; }
+    button { background: #28a745; color: white; border: none; padding: 8px 12px; border-radius: 4px; margin-top: 10px; cursor: pointer; }
+    .no-orders { background: white; padding: 20px; border-radius: 8px; text-align: center; color: #666; font-size: 16px; }
+  </style>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+</head>
+<body>
+  <h1>Kitchen Incoming Orders</h1>
+  <div id="orders-list">
+    <div class="no-orders">Listening for orders...</div>
+  </div>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyC616K7b9vsNDcuVrXQpDYOS2L9h1OpxIw",
+      authDomain: "my-cafe12.firebaseapp.com",
+      projectId: "my-cafe12",
+      storageBucket: "my-cafe12.firebasestorage.app",
+      messagingSenderId: "621111977103",
+      appId: "1:621111977103:web:0246bb820fa55f90a9fcfa",
+      measurementId: "G-CM63Q78KHP"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    // Listen for real-time order updates
+    db.collection("orders").onSnapshot(snapshot => {
+      const list = document.getElementById('orders-list');
+      
+      if (snapshot.empty) {
+        list.innerHTML = '<div class="no-orders">No active orders right now.</div>';
+        return;
+      }
+
+      list.innerHTML = '';
+      snapshot.forEach(doc => {
+        const order = doc.data();
+        const id = doc.id;
+        const itemsText = order.items ? order.items.map(i => `<li>${i.name} x${i.qty}</li>`).join('') : '';
+
+        list.innerHTML += `
+          <div class="order-card ${order.status === 'Served' ? 'done' : ''}">
+            <h3>Table #${order.table} [${order.status}]</h3>
+            <ul style="margin: 8px 0 8px 20px;">${itemsText}</ul>
+            <p><strong>Total: NPR ${order.total}</strong></p>
+            ${order.status === 'Pending' ? `<button onclick="markServed('${id}')">Mark as Served</button>` : ''}
+          </div>
+        `;
+      });
+    }, error => {
+      console.error(error);
+      document.getElementById('orders-list').innerHTML = '<div class="no-orders" style="color: red;">Error connecting to database.</div>';
+    });
+
+    async function markServed(id) {
+      await db.collection("orders").doc(id).update({ status: "Served" });
+    }
+  </script>
+</body>
+</html>
