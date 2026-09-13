@@ -11,7 +11,28 @@
     
     .header { background: white; padding: 16px 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 10; display: flex; justify-content: space-between; align-items: center; }
     .header h1 { font-size: 20px; font-weight: 700; color: #0f172a; display: flex; align-items: center; gap: 8px; }
-    .table-badge { background: #e0f2fe; color: #0369a1; padding: 6px 12px; border-radius: 20px; font-size: 13px; font-weight: 700; }
+    
+    /* Interactive Table Select Dropdown Styling */
+    .table-select-badge { 
+      background: #e0f2fe; 
+      color: #0369a1; 
+      padding: 6px 12px; 
+      border-radius: 20px; 
+      font-size: 13px; 
+      font-weight: 700; 
+      border: 1px solid #bae6fd;
+      outline: none;
+      cursor: pointer;
+      appearance: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      padding-right: 24px;
+      background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230369a1' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+      background-repeat: no-repeat;
+      background-position: right 8px center;
+      background-size: 12px;
+    }
+    .table-select-badge:focus { border-color: #0284c7; box-shadow: 0 0 0 2px rgba(2, 132, 199, 0.2); }
     
     .category-nav { display: flex; gap: 8px; overflow-x: auto; padding: 12px 20px; background: white; border-bottom: 1px solid #e2e8f0; scrollbar-width: none; }
     .category-nav::-webkit-scrollbar { display: none; }
@@ -54,7 +75,20 @@
 
   <div class="header">
     <h1>🍵 TeaToast</h1>
-    <div class="table-badge" id="table-display">Loading...</div>
+    <!-- Dropdown Table Select Menu -->
+    <select class="table-select-badge" id="table-select" onchange="updateTableSelection(this.value)">
+      <option value="Takeaway">🥡 Takeaway</option>
+      <option value="1">Table #1</option>
+      <option value="2">Table #2</option>
+      <option value="3">Table #3</option>
+      <option value="4">Table #4</option>
+      <option value="5">Table #5</option>
+      <option value="6">Table #6</option>
+      <option value="7">Table #7</option>
+      <option value="8">Table #8</option>
+      <option value="9">Table #9</option>
+      <option value="10">Table #10</option>
+    </select>
   </div>
 
   <div class="category-nav" id="category-bar">
@@ -79,7 +113,7 @@
   <div class="modal" id="success-modal">
     <div class="modal-card">
       <h3>🎉 Order Placed!</h3>
-      <p>Your order has been sent to the TeaToast kitchen. We will serve it to your table shortly!</p>
+      <p id="modal-desc">Your order has been sent to the TeaToast kitchen. We will serve it to your table shortly!</p>
       <button class="close-btn" onclick="closeModal()">Done</button>
     </div>
   </div>
@@ -112,18 +146,23 @@
     let currentCategory = 'All';
     let tableNumber = 'Takeaway';
 
-    // Extract Table Number from URL query parameter (e.g. ?table=4)
     window.onload = () => {
       const urlParams = new URLSearchParams(window.location.search);
       const tableParam = urlParams.get('table');
+      const selectElem = document.getElementById('table-select');
+
       if (tableParam) {
         tableNumber = tableParam;
-        document.getElementById('table-display').innerText = `Table #${tableNumber}`;
+        selectElem.value = tableParam;
       } else {
-        document.getElementById('table-display').innerText = `🥡 Takeaway`;
+        tableNumber = selectElem.value;
       }
       renderMenu();
     };
+
+    function updateTableSelection(val) {
+      tableNumber = val;
+    }
 
     function filterCategory(cat) {
       currentCategory = cat;
@@ -222,6 +261,12 @@
           status: "Pending",
           timestamp: firebase.firestore.FieldValue.serverTimestamp()
         });
+
+        // Custom Modal Description
+        const descText = tableNumber === 'Takeaway' 
+          ? 'Your takeaway order has been sent to the TeaToast kitchen!' 
+          : `Your order has been sent to the TeaToast kitchen for Table #${tableNumber}!`;
+        document.getElementById('modal-desc').innerText = descText;
 
         // Reset cart and show popup
         cart = {};
