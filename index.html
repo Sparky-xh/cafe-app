@@ -3,41 +3,46 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Cafe Menu</title>
+  <title>Cafe Digital Menu</title>
   <style>
     * { box-sizing: border-box; font-family: sans-serif; margin: 0; padding: 0; }
-    body { padding: 16px; background: #f8f9fa; color: #333; }
-    .card { background: white; padding: 16px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 16px; }
-    .item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-    button { background: #007bff; color: white; border: none; padding: 8px 14px; border-radius: 4px; cursor: pointer; }
-    button:disabled { background: #ccc; }
+    body { padding: 16px; background: #f8f9fa; color: #333; padding-bottom: 90px; }
+    
+    .header { text-align: center; margin-bottom: 20px; }
+    .table-badge { background: #007bff; color: white; padding: 4px 12px; border-radius: 20px; font-size: 14px; display: inline-block; margin-top: 6px; }
+    
+    .category-title { font-size: 18px; margin: 16px 0 10px 0; border-bottom: 2px solid #ddd; padding-bottom: 4px; color: #495057; }
+    
+    .menu-item { background: white; padding: 14px; border-radius: 8px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+    .item-name { font-weight: bold; font-size: 16px; }
+    .item-price { color: #6c757d; font-size: 14px; margin-top: 2px; }
+    
+    .qty-controls { display: flex; align-items: center; gap: 8px; }
+    .qty-btn { width: 32px; height: 32px; border: none; background: #e9ecef; border-radius: 50%; font-weight: bold; font-size: 16px; cursor: pointer; }
+    .qty-btn:active { background: #ced4da; }
+    
+    .cart-bar { position: fixed; bottom: 0; left: 0; right: 0; background: white; padding: 16px; box-shadow: 0 -2px 10px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; }
+    .checkout-btn { background: #28a745; color: white; border: none; padding: 12px 24px; border-radius: 6px; font-size: 16px; font-weight: bold; cursor: pointer; }
+    .checkout-btn:disabled { background: #6c757d; cursor: not-allowed; }
   </style>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 </head>
 <body>
-  <div class="card">
-    <h2 id="table-display">Table Number</h2>
+
+  <div class="header">
+    <h1>Welcome to Our Cafe</h1>
+    <span class="table-badge" id="table-display">Detecting Table...</span>
   </div>
 
-  <div class="card">
-    <h3>Menu</h3>
-    <br>
-    <div class="item">
-      <span><strong>Iced Americano</strong> - NPR 250</span>
-      <button onclick="addToCart('Iced Americano', 250)">Add</button>
-    </div>
-    <div class="item">
-      <span><strong>Cafe Latte</strong> - NPR 280</span>
-      <button onclick="addToCart('Cafe Latte', 280)">Add</button>
-    </div>
-  </div>
+  <div id="menu-container"></div>
 
-  <div class="card">
-    <h3>Your Order</h3>
-    <ul id="cart-list" style="margin: 12px 0; list-style-position: inside;"></ul>
-    <p><strong>Total: NPR <span id="total">0</span></strong></p>
-    <button id="order-btn" style="width: 100%; margin-top: 12px; padding: 12px; font-size: 16px;" onclick="placeOrder()" disabled>Submit Order</button>
+  <div class="cart-bar">
+    <div>
+      <div style="font-size: 12px; color: #6c757d;">Total Amount</div>
+      <div style="font-size: 18px; font-weight: bold; color: #28a745;" id="total-price">NPR 0</div>
+    </div>
+    <button class="checkout-btn" id="submit-btn" onclick="submitOrder()" disabled>Place Order</button>
   </div>
 
   <script>
@@ -54,50 +59,126 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
+    // Detect table number from URL (e.g., ?table=2)
     const urlParams = new URLSearchParams(window.location.search);
-    const tableNumber = urlParams.get('table') || '1';
+    const tableNumber = urlParams.get('table') || 'Takeaway / Unknown';
     document.getElementById('table-display').innerText = `Table #${tableNumber}`;
 
-    let cart = [];
+    // Cafe Menu Items
+    const menuData = [
+      {
+        category: "☕ Hot Beverages",
+        items: [
+          { id: "m1", name: "Espresso", price: 120 },
+          { id: "m2", name: "Americano", price: 150 },
+          { id: "m3", name: "Cafe Latte", price: 200 },
+          { id: "m4", name: "Cappuccino", price: 220 },
+          { id: "m5", name: "Milk Tea (Chiya)", price: 50 }
+        ]
+      },
+      {
+        category: "🥤 Cold Drinks & Bakery",
+        items: [
+          { id: "m6", name: "Iced Americano", price: 180 },
+          { id: "m7", name: "Iced Latte", price: 230 },
+          { id: "m8", name: "Chocolate Donut", price: 100 },
+          { id: "m9", name: "Chicken Sandwich", price: 250 }
+        ]
+      }
+    ];
 
-    function addToCart(name, price) {
-      const existing = cart.find(i => i.name === name);
-      if (existing) existing.qty += 1;
-      else cart.push({ name, price, qty: 1 });
-      renderCart();
-    }
+    let cart = {};
 
-    function renderCart() {
-      const list = document.getElementById('cart-list');
-      list.innerHTML = '';
-      let sum = 0;
-      cart.forEach(item => {
-        sum += item.price * item.qty;
-        list.innerHTML += `<li>${item.name} x${item.qty} - NPR ${item.price * item.qty}</li>`;
+    function renderMenu() {
+      const container = document.getElementById('menu-container');
+      container.innerHTML = '';
+
+      menuData.forEach(cat => {
+        container.innerHTML += `<div class="category-title">${cat.category}</div>`;
+        cat.items.forEach(item => {
+          const qty = cart[item.id]?.qty || 0;
+          container.innerHTML += `
+            <div class="menu-item">
+              <div>
+                <div class="item-name">${item.name}</div>
+                <div class="item-price">NPR ${item.price}</div>
+              </div>
+              <div class="qty-controls">
+                ${qty > 0 ? `<button class="qty-btn" onclick="updateQty('${item.id}', '${item.name}', ${item.price}, -1)">-</button>` : ''}
+                ${qty > 0 ? `<span style="font-weight:bold">${qty}</span>` : ''}
+                <button class="qty-btn" onclick="updateQty('${item.id}', '${item.name}', ${item.price}, 1)">+</button>
+              </div>
+            </div>
+          `;
+        });
       });
-      document.getElementById('total').innerText = sum;
-      document.getElementById('order-btn').disabled = cart.length === 0;
     }
 
-    async function placeOrder() {
-      const total = cart.reduce((s, i) => s + (i.price * i.qty), 0);
+    function updateQty(id, name, price, change) {
+      if (!cart[id]) {
+        cart[id] = { name: name, price: price, qty: 0 };
+      }
+      cart[id].qty += change;
+
+      if (cart[id].qty <= 0) {
+        delete cart[id];
+      }
+
+      updateCartUI();
+      renderMenu();
+    }
+
+    function updateCartUI() {
+      let total = 0;
+      let count = 0;
+
+      Object.values(cart).forEach(item => {
+        total += item.price * item.qty;
+        count += item.qty;
+      });
+
+      document.getElementById('total-price').innerText = `NPR ${total}`;
+      const btn = document.getElementById('submit-btn');
+      btn.disabled = count === 0;
+    }
+
+    async function submitOrder() {
+      const btn = document.getElementById('submit-btn');
+      btn.disabled = true;
+      btn.innerText = "Placing Order...";
+
+      const orderItems = Object.values(cart).map(item => ({
+        name: item.name,
+        qty: item.qty,
+        price: item.price
+      }));
+
+      let total = 0;
+      orderItems.forEach(i => total += (i.price * i.qty));
+
       try {
         await db.collection("orders").add({
           table: tableNumber,
-          items: cart,
+          items: orderItems,
           total: total,
           status: "Pending",
           timestamp: firebase.firestore.FieldValue.serverTimestamp()
         });
+
         alert("Order sent to kitchen!");
-        cart = [];
-        renderCart();
-      } catch (e) {
-        console.error(e);
-        alert("Failed to send order. Check database rules.");
+        cart = {};
+        updateCartUI();
+        renderMenu();
+      } catch (err) {
+        alert("Failed to send order. Please try again.");
+        console.error(err);
+      } finally {
+        btn.innerText = "Place Order";
       }
     }
+
+    // Initial render
+    renderMenu();
   </script>
 </body>
 </html>
-
