@@ -7,7 +7,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg-body: #f1f5f9;
+      --bg-body: #f8fafc;
       --text-main: #0f172a;
       --text-sub: #64748b;
       --bg-card: #ffffff;
@@ -20,42 +20,45 @@
       --chip-active-text: #ffffff;
       --modal-bg: #ffffff;
       --modal-header-bg: #f8fafc;
-      --hover-bg: #f8fafc;
-      --input-border: #cbd5e1;
+      --hover-bg: #f1f5f9;
       --social-bg: #f8fafc;
       --tiktok-icon-color: #000000;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
+      --shadow-md: 0 4px 12px rgba(0,0,0,0.05);
     }
 
     [data-theme="dark"] {
-      --bg-body: #0f172a;
+      --bg-body: #090d16;
       --text-main: #f8fafc;
       --text-sub: #94a3b8;
-      --bg-card: #1e293b;
-      --border-color: #334155;
-      --bg-header: #1e293b;
-      --bg-chip: #1e293b;
+      --bg-card: #131c2e;
+      --border-color: #1e293b;
+      --bg-header: #131c2e;
+      --bg-chip: #131c2e;
       --text-chip: #94a3b8;
       --border-chip: #334155;
       --chip-active-bg: #38bdf8;
-      --chip-active-text: #0f172a;
-      --modal-bg: #1e293b;
-      --modal-header-bg: #0f172a;
-      --hover-bg: #334155;
-      --input-border: #475569;
-      --social-bg: #0f172a;
+      --chip-active-text: #090d16;
+      --modal-bg: #131c2e;
+      --modal-header-bg: #090d16;
+      --hover-bg: #1e293b;
+      --social-bg: #090d16;
       --tiktok-icon-color: #ffffff;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.3);
+      --shadow-md: 0 4px 12px rgba(0,0,0,0.3);
     }
 
-    * { box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; margin: 0; padding: 0; transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease; }
+    * { box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; margin: 0; padding: 0; transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease; }
     body { background: var(--bg-body); color: var(--text-main); padding: 20px 16px 40px 16px; min-height: 100vh; }
     
-    .dashboard-container { max-width: 1200px; margin: 0 auto; }
+    .dashboard-container { max-width: 1240px; margin: 0 auto; }
 
-    /* Top Navigation Header */
-    .header { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 24px; background: var(--bg-header); padding: 16px 20px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.03); border: 1px solid var(--border-color); }
-    .brand { display: flex; align-items: center; gap: 10px; }
+    /* Header */
+    .header { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 24px; background: var(--bg-header); padding: 18px 24px; border-radius: 16px; box-shadow: var(--shadow-md); border: 1px solid var(--border-color); }
+    .brand { display: flex; align-items: center; gap: 12px; }
+    .brand-logo { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid var(--border-color); }
     .brand h1 { font-size: 22px; font-weight: 800; color: var(--text-main); letter-spacing: -0.5px; }
-    .live-badge { background: #dcfce7; color: #15803d; font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 20px; display: flex; align-items: center; gap: 6px; }
+    .live-badge { background: #dcfce7; color: #15803d; font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 20px; display: flex; align-items: center; gap: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
     [data-theme="dark"] .live-badge { background: #064e3b; color: #4ade80; }
     .live-dot { width: 7px; height: 7px; background: #22c55e; border-radius: 50%; animation: pulse 1.5s infinite; }
 
@@ -64,9 +67,9 @@
       70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(34, 197, 94, 0); }
       100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
     }
-    /* Social Links Styling */
+
     .social-links { display: flex; align-items: center; gap: 6px; background: var(--social-bg); padding: 4px 8px; border-radius: 10px; border: 1px solid var(--border-color); }
-    .social-btn { display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 8px; text-decoration: none; transition: transform 0.15s ease, background-color 0.2s ease; }
+    .social-btn { display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 8px; text-decoration: none; transition: transform 0.15s ease; }
     .social-btn:hover { transform: translateY(-2px); }
     .social-btn svg { width: 18px; height: 18px; display: block; }
     
@@ -78,25 +81,22 @@
     .social-btn.tiktok svg { fill: var(--tiktok-icon-color); }
 
     .header-actions { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
-    .btn-action { background: var(--bg-body); color: var(--text-main); font-size: 13px; font-weight: 700; padding: 10px 16px; border: 1px solid var(--border-color); border-radius: 10px; cursor: pointer; transition: all 0.2s; }
-    .btn-action:hover { background: var(--hover-bg); }
+    .btn-action { background: var(--bg-body); color: var(--text-main); font-size: 13px; font-weight: 700; padding: 10px 16px; border: 1px solid var(--border-color); border-radius: 10px; cursor: pointer; }
+    .btn-action:hover { background: var(--hover-bg); border-color: var(--text-sub); }
     
-    .enable-audio-btn { background: #2563eb; color: white; font-size: 13px; font-weight: 700; padding: 10px 16px; border: none; border-radius: 10px; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 12px rgba(37,99,235,0.25); }
-    .enable-audio-btn:hover { background: #1d4ed8; }
+    .enable-audio-btn { background: #2563eb; color: white; font-size: 13px; font-weight: 700; padding: 10px 16px; border: none; border-radius: 10px; cursor: pointer; box-shadow: 0 4px 12px rgba(37,99,235,0.25); }
     .enable-audio-btn.sound-off { background: #64748b; box-shadow: 0 4px 12px rgba(100,116,139,0.25); }
-    .enable-audio-btn.sound-off:hover { background: #475569; }
-
-    /* Summary Metrics Bar */
-    .metrics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px; }
-    .metric-card { background: var(--bg-card); padding: 18px 20px; border-radius: 14px; border: 1px solid var(--border-color); box-shadow: 0 2px 8px rgba(0,0,0,0.02); display: flex; justify-content: space-between; align-items: center; }
+    /* Metrics Bar */
+    .metrics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 24px; }
+    .metric-card { background: var(--bg-card); padding: 20px 22px; border-radius: 16px; border: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; box-shadow: var(--shadow-sm); }
     .metric-card.interactive { cursor: pointer; }
-    .metric-card.interactive:hover { border-color: var(--text-sub); transform: translateY(-2px); }
+    .metric-card.interactive:hover { border-color: #3b82f6; transform: translateY(-2px); box-shadow: var(--shadow-md); }
     .metric-card.active-metric-card { border-color: #2563eb; background: var(--hover-bg); box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2); }
     
-    .metric-title { font-size: 12px; font-weight: 700; color: var(--text-sub); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
-    .metric-value { font-size: 24px; font-weight: 800; color: var(--text-main); }
-    .metric-icon { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; }
-    .icon-orders { background: #f0f9ff; color: #0284c7; }
+    .metric-title { font-size: 12px; font-weight: 700; color: var(--text-sub); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+    .metric-value { font-size: 26px; font-weight: 800; color: var(--text-main); }
+    .metric-icon { width: 46px; height: 46px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 22px; }
+    .icon-orders { background: #eff6ff; color: #0284c7; }
     .icon-served { background: #f0fdf4; color: #16a34a; }
     .icon-revenue { background: #fefce8; color: #ca8a04; }
     [data-theme="dark"] .icon-orders { background: #075985; color: #bae6fd; }
@@ -105,7 +105,7 @@
 
     /* Filter Bar */
     .filter-section { margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
-    .table-nav { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 6px; scrollbar-width: none; }
+    .table-nav { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 6px; width: 100%; }
     .table-nav::-webkit-scrollbar { display: none; }
     .table-chip { background: var(--bg-chip); border: 1px solid var(--border-chip); color: var(--text-chip); padding: 8px 18px; border-radius: 20px; font-weight: 700; font-size: 13px; cursor: pointer; white-space: nowrap; }
     .table-chip.active { background: var(--chip-active-bg); color: var(--chip-active-text); border-color: var(--chip-active-bg); }
@@ -114,19 +114,19 @@
     [data-theme="dark"] .status-indicator-banner { background: #0c4a6e; color: #7dd3fc; }
     .status-indicator-banner button { background: none; border: none; color: inherit; cursor: pointer; font-weight: 800; text-decoration: underline; }
 
-    /* Orders Grid Layout */
-    .orders-grid { display: grid; grid-template-columns: 1fr; gap: 16px; }
-
+    /* Orders Grid */
+    .orders-grid { display: grid; grid-template-columns: 1fr; gap: 20px; }
     @media (min-width: 640px) { .orders-grid { grid-template-columns: repeat(2, 1fr); } }
     @media (min-width: 1024px) { .orders-grid { grid-template-columns: repeat(3, 1fr); } }
 
-    .order-card { background: var(--bg-card); border-radius: 16px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); border: 1px solid var(--border-color); border-top: 5px solid #eab308; display: flex; flex-direction: column; justify-content: space-between; }
+    .order-card { background: var(--bg-card); border-radius: 16px; padding: 20px; box-shadow: var(--shadow-sm); border: 1px solid var(--border-color); border-top: 5px solid #eab308; display: flex; flex-direction: column; justify-content: space-between; transition: transform 0.2s ease; }
+    .order-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
     .order-card.preparing { border-top-color: #3b82f6; }
-    .order-card.done { border-top-color: #22c55e; opacity: 0.85; }
+    .order-card.done { border-top-color: #22c55e; opacity: 0.9; }
 
-    .order-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; }
+    .order-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid var(--border-color); padding-bottom: 12px; }
     .table-badge { font-size: 18px; font-weight: 800; color: var(--text-main); }
-    .order-status { font-size: 11px; font-weight: 800; text-transform: uppercase; padding: 4px 10px; border-radius: 6px; background: #fef9c3; color: #854d0e; }
+    .order-status { font-size: 11px; font-weight: 800; text-transform: uppercase; padding: 4px 10px; border-radius: 6px; background: #fef9c3; color: #854d0e; letter-spacing: 0.5px; }
     .preparing .order-status { background: #dbeafe; color: #1e40af; }
     .done .order-status { background: #dcfce7; color: #166534; }
     [data-theme="dark"] .order-status { background: #713f12; color: #fef08a; }
@@ -136,32 +136,27 @@
     .order-time { font-size: 12px; color: var(--text-sub); font-weight: 600; margin-bottom: 14px; display: flex; align-items: center; gap: 4px; }
     
     .items-list { list-style: none; margin-bottom: 16px; flex-grow: 1; }
-    .items-list li { font-size: 14px; font-weight: 600; color: var(--text-main); padding: 6px 0; border-bottom: 1px dashed var(--border-color); display: flex; justify-content: space-between; }
+    .items-list li { font-size: 14px; font-weight: 600; color: var(--text-main); padding: 8px 0; border-bottom: 1px dashed var(--border-color); display: flex; justify-content: space-between; align-items: center; }
     .items-list li span.qty { color: #2563eb; font-weight: 800; background: #eff6ff; padding: 2px 8px; border-radius: 6px; }
     [data-theme="dark"] .items-list li span.qty { color: #38bdf8; background: #0c4a6e; }
 
-    .order-footer { margin-top: 12px; border-top: 1px solid var(--border-color); padding-top: 12px; }
+    .order-footer { margin-top: 12px; border-top: 1px solid var(--border-color); padding-top: 14px; }
     .order-total { font-size: 16px; font-weight: 800; color: #22c55e; margin-bottom: 12px; }
 
     .actions { display: flex; flex-wrap: wrap; gap: 8px; }
-    .btn { border: none; padding: 9px 12px; border-radius: 8px; cursor: pointer; font-weight: 700; font-size: 13px; flex: 1; text-align: center; }
+    .btn { border: none; padding: 10px 14px; border-radius: 10px; cursor: pointer; font-weight: 700; font-size: 13px; flex: 1; text-align: center; }
     .btn:active { transform: scale(0.96); }
     .btn-prepare { background: #3b82f6; color: white; }
-    .btn-prepare:hover { background: #2563eb; }
     .btn-served { background: #22c55e; color: white; }
-    .btn-served:hover { background: #16a34a; }
     .btn-archive { background: #64748b; color: white; }
-    .btn-archive:hover { background: #475569; }
     .btn-edit { background: var(--bg-body); color: var(--text-main); border: 1px solid var(--border-color); flex: none; }
-    .btn-edit:hover { background: var(--hover-bg); }
     .btn-print { background: #8b5cf6; color: white; flex: none; }
-    .btn-print:hover { background: #7c3aed; }
     .btn-danger { background: #fef2f2; color: #ef4444; border: 1px solid #fecaca; flex: none; }
     [data-theme="dark"] .btn-danger { background: #450a0a; color: #fca5a5; border-color: #7f1d1d; }
 
     /* Modals */
     .modal-overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(4px); display: none; justify-content: center; align-items: center; z-index: 1000; padding: 20px; }
-    .modal-box { background: var(--modal-bg); border-radius: 20px; width: 100%; max-width: 800px; max-height: 85vh; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.3); border: 1px solid var(--border-color); }
+    .modal-box { background: var(--modal-bg); border-radius: 20px; width: 100%; max-width: 800px; max-height: 85vh; display: flex; flex-direction: column; overflow: hidden; border: 1px solid var(--border-color); box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); }
     .modal-header { padding: 20px 24px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; background: var(--modal-header-bg); }
     .modal-header h2 { font-size: 18px; font-weight: 800; color: var(--text-main); }
     .modal-close { background: none; border: none; font-size: 20px; font-weight: 800; color: var(--text-sub); cursor: pointer; }
@@ -170,20 +165,18 @@
     .archive-table { width: 100%; border-collapse: collapse; text-align: left; }
     .archive-table th { font-size: 12px; font-weight: 700; color: var(--text-sub); text-transform: uppercase; padding: 12px 16px; border-bottom: 2px solid var(--border-color); }
     .archive-table td { padding: 14px 16px; border-bottom: 1px solid var(--border-color); font-size: 14px; font-weight: 600; color: var(--text-main); }
-    .archive-table tr:hover { background: var(--hover-bg); }
-    /* Visual Empty State */
+
     .empty-state { grid-column: 1 / -1; background: var(--bg-card); border-radius: 20px; text-align: center; padding: 70px 20px; border: 2px dashed var(--border-color); }
     .empty-icon { font-size: 48px; margin-bottom: 12px; display: inline-block; }
     .empty-title { font-size: 18px; font-weight: 800; color: var(--text-main); margin-bottom: 6px; }
-    .empty-subtitle { font-size: 14px; color: var(--text-sub); max-width: 320px; margin: 0 auto; }
+    .empty-subtitle { font-size: 14px; color: var(--text-sub); max-width: 340px; margin: 0 auto; }
 
     #print-area { display: none; }
 
-    /* Thermal Print Rules */
     @media print {
       body * { visibility: hidden; }
       #print-area, #print-area * { visibility: visible; }
-      #print-area { display: block !important; position: absolute; left: 0; top: 0; width: 72mm; font-family: 'Courier New', Courier, monospace; color: #000; background: #fff; padding: 0; margin: 0; }
+      #print-area { display: block !important; position: absolute; left: 0; top: 0; width: 72mm; font-family: monospace; color: #000; background: #fff; padding: 0; margin: 0; }
       .ticket-title { font-size: 20px; font-weight: bold; text-align: center; text-transform: uppercase; margin-bottom: 4px; }
       .ticket-sub { font-size: 12px; text-align: center; border-bottom: 1px dashed #000; padding-bottom: 6px; margin-bottom: 8px; }
       .ticket-table { font-size: 18px; font-weight: bold; margin-bottom: 4px; }
@@ -228,29 +221,25 @@
       </div>
     </div>
   </div>
- <!-- Stock Management Modal (86ing) -->
+  <!-- Stock Management Modal -->
   <div class="modal-overlay" id="inventory-modal">
     <div class="modal-box" style="max-width: 500px;">
       <div class="modal-header">
         <h2>🍱 Menu Availability (86ing)</h2>
         <button class="modal-close" onclick="closeInventoryModal()">✕</button>
       </div>
-      <div class="modal-body" id="inventory-list">
-        <!-- Toggles rendered via JS -->
-      </div>
+      <div class="modal-body" id="inventory-list"></div>
     </div>
   </div>
 
   <div class="dashboard-container">
-    
-    <!-- Header -->
     <div class="header">
       <div class="brand">
-        <h1>🍵 TeaToast Kitchen</h1>
+        <img src="31436.png" alt="TeaToast Logo" class="brand-logo">
+        <h1>TeaToast Kitchen</h1>
         <div class="live-badge"><div class="live-dot"></div> Live Stream</div>
       </div>
       <div class="header-actions">
-        <!-- Social Profiles Bar with SVG Logos -->
         <div class="social-links">
           <a href="https://www.instagram.com/_floydaryan?stkn=c3BvYmUxY3cyb3h6" target="_blank" rel="noopener" class="social-btn instagram" title="Instagram">
             <svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
@@ -265,172 +254,7 @@
         <button class="btn-action" id="theme-toggle-btn" onclick="toggleTheme()">🌙 Dark Mode</button>
         <button class="btn-action" onclick="openInventoryModal()">🍱 Manage Stock</button>
         <button class="btn-action" onclick="openArchiveModal()">📦 View Archives</button>
-        <button id="audio-btn" class="enable-audio-btn" onclick="toggleAudio()">🔔 Enable Sound</button>
-      </div>
-    </div>
-
-    <!-- Summary Metrics -->
-    <div class="metrics-grid">
-      <div class="metric-card interactive" id="card-pending" onclick="filterByStatus('Pending')">
-        <div>
-          <div class="metric-title">Pending Orders</div>
-          <div class="metric-value" id="stat-pending">0</div>
-        </div>
-        <div class="metric-icon icon-orders">⏳</div>
-      </div>
-      <div class="metric-card interactive" id="card-served" onclick="filterByStatus('Served')">
-        <div>
-          <div class="metric-title">Served Orders</div>
-          <div class="metric-value" id="stat-served">0</div>
-        </div>
-        <div class="metric-icon icon-served">✅</div>
-      </div>
-      <div class="metric-card">
-        <div>
-          <div class="metric-title">Shift Revenue</div>
-          <div class="metric-value" id="stat-revenue">NPR 0</div>
-        </div>
-        <div class="metric-icon icon-revenue">💰</div>
-      </div>
-    </div>
-
-    <!-- Filter Bar -->
-    <div class="filter-section">
-      <div class="table-nav" id="table-filter-bar">
-        <button class="table-chip active" onclick="filterByTable('ALL')">Show All Tables</button>
-      </div>
-      <div id="status-filter-indicator" style="display: none;"></div>
-    </div>
-
-    <!-- Orders Grid -->
-    <div class="orders-grid" id="orders-list">
-      <div class="empty-state">
-        <div class="empty-icon" id="status-icon">⏳</div>
-        <div class="empty-title" id="status-title">Connecting to Firestore...</div>
-        <div class="empty-subtitle" id="status-subtitle">Please check your internet connection or browser settings.</div>
-      </div>
-    </div>
-
-  </div>
-  
-  <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyC616K7b9vsNDcuVrXQpDYOS2L9h1OpxIw",
-      authDomain: "my-cafe12.firebaseapp.com",
-      projectId: "my-cafe12",
-      storageBucket: "my-cafe12.firebasestorage.app",
-      messagingSenderId: "621111977103",
-      appId: "1:621111977103:web:0246bb820fa55f90a9fcfa",
-      measurementId: "G-CM63Q78KHP"
-    };
-
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
-
-    let audioCtx = null;
-    let soundEnabled = false;
-    let isInitialLoad = true;
-    let rawAllOrders = [];
-    let activeOrders = [];
-    let archivedOrders = [];
-    let selectedTable = 'ALL';
-    let selectedStatus = 'ALL';
-    
-    let outOfStockIds = [];
-    const catalogItems = [
-      { id: 1, name: "Special Masala Tea" },
-      { id: 2, name: "Milk Coffee" },
-      { id: 3, name: "Butter Toast" },
-      { id: 4, name: "Cheese Toast" },
-      { id: 5, name: "Veg Steam Momo" },
-      { id: 6, name: "Chicken Chowmein" }
-    ];
-
-    window.addEventListener('load', () => {
-      initTheme();
-      initKitchenDisplay();
-      initInventoryListener();
-    });
-
-    /* Theme / Dark Mode Handler */
-    function initTheme() {
-      const savedTheme = localStorage.getItem('theme');
-      if (savedTheme) {
-        applyTheme(savedTheme);
-      } else {
-        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        applyTheme(prefersDark ? 'dark' : 'light');
-      }
-
-      window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
-        if (!localStorage.getItem('theme')) {
-          applyTheme(e.matches ? 'dark' : 'light');
-        }
-      });
-    }
-
-    function toggleTheme() {
-      const current = document.documentElement.getAttribute('data-theme') || 'light';
-      const nextTheme = current === 'dark' ? 'light' : 'dark';
-      localStorage.setItem('theme', nextTheme);
-      applyTheme(nextTheme);
-    }
-
-    function applyTheme(theme) {
-      document.documentElement.setAttribute('data-theme', theme);
-      const btn = document.getElementById('theme-toggle-btn');
-      if (btn) {
-        btn.innerText = theme === 'dark' ? '☀️ Light Mode' : '🌙 Dark Mode';
-      }
-    }
-
-    function initInventoryListener() {
-      db.collection("inventory").doc("menu_status").onSnapshot(doc => {
-        if (doc.exists) {
-          outOfStockIds = doc.data().outOfStock || [];
-        } else {
-          outOfStockIds = [];
-        }
-        renderInventoryControls();
-      });
-    }<!-- Stock Management Modal (86ing) -->
-  <div class="modal-overlay" id="inventory-modal">
-    <div class="modal-box" style="max-width: 500px;">
-      <div class="modal-header">
-        <h2>🍱 Menu Availability (86ing)</h2>
-        <button class="modal-close" onclick="closeInventoryModal()">✕</button>
-      </div>
-      <div class="modal-body" id="inventory-list">
-        <!-- Toggles rendered via JS -->
-      </div>
-    </div>
-  </div>
-
-  <div class="dashboard-container">
-    
-    <!-- Header -->
-    <div class="header">
-      <div class="brand">
-        <h1>🍵 TeaToast Kitchen</h1>
-        <div class="live-badge"><div class="live-dot"></div> Live Stream</div>
-      </div>
-      <div class="header-actions">
-        <!-- Social Profiles Bar with SVG Logos -->
-        <div class="social-links">
-          <a href="https://www.instagram.com/_floydaryan?stkn=c3BvYmUxY3cyb3h6" target="_blank" rel="noopener" class="social-btn instagram" title="Instagram">
-            <svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
-          </a>
-          <a href="https://www.facebook.com/imthorfinn" target="_blank" rel="noopener" class="social-btn facebook" title="Facebook">
-            <svg viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
-          </a>
-          <a href="https://www.tiktok.com/@.floydaryan" target="_blank" rel="noopener" class="social-btn tiktok" title="TikTok">
-            <svg viewBox="0 0 24 24"><path d="M12.525 0h3.08c.12 1.455.77 2.768 1.8 3.731 1.03.963 2.41 1.545 3.93 1.579v3.136c-1.87-.04-3.56-.676-4.9-1.744v7.712c0 4.197-3.41 7.6-7.6 7.6-4.198 0-7.6-3.403-7.6-7.6 0-4.197 3.402-7.6 7.6-7.6.43 0 .85.037 1.26.108v3.23c-.41-.122-.84-.19-1.26-.19-2.43 0-4.4 1.97-4.4 4.4 0 2.43 1.97 4.4 4.4 4.4 2.43 0 4.4-1.97 4.4-4.4V0z"/></svg>
-          </a>
-        </div>
-        <button class="btn-action" id="theme-toggle-btn" onclick="toggleTheme()">🌙 Dark Mode</button>
-        <button class="btn-action" onclick="openInventoryModal()">🍱 Manage Stock</button>
-        <button class="btn-action" onclick="openArchiveModal()">📦 View Archives</button>
-        <button id="audio-btn" class="enable-audio-btn" onclick="toggleAudio()">🔔 Enable Sound</button>
+        <button id="audio-btn" class="enable-audio-btn sound-off" onclick="toggleAudio()">🔔 Enable Sound</button>
       </div>
     </div>
 
@@ -463,20 +287,19 @@
       <div class="table-nav" id="table-filter-bar">
         <button class="table-chip active" onclick="filterByTable('ALL')">Show All Tables</button>
       </div>
-      <div id="status-filter-indicator" style="display: none;"></div>
+      <div id="status-filter-indicator" style="display: none; width: 100%; margin-top: 8px;"></div>
     </div>
 
     <!-- Orders Grid -->
     <div class="orders-grid" id="orders-list">
       <div class="empty-state">
-        <div class="empty-icon" id="status-icon">⏳</div>
-        <div class="empty-title" id="status-title">Connecting to Firestore...</div>
-        <div class="empty-subtitle" id="status-subtitle">Please check your internet connection or browser settings.</div>
+        <div class="empty-icon">⏳</div>
+        <div class="empty-title">Connecting to Firestore...</div>
+        <div class="empty-subtitle">Please check your internet connection or database setup.</div>
       </div>
     </div>
-
   </div>
-  
+
   <script>
     const firebaseConfig = {
       apiKey: "AIzaSyC616K7b9vsNDcuVrXQpDYOS2L9h1OpxIw",
@@ -484,8 +307,7 @@
       projectId: "my-cafe12",
       storageBucket: "my-cafe12.firebasestorage.app",
       messagingSenderId: "621111977103",
-      appId: "1:621111977103:web:0246bb820fa55f90a9fcfa",
-      measurementId: "G-CM63Q78KHP"
+      appId: "1:621111977103:web:0246bb820fa55f90a9fcfa"
     };
 
     firebase.initializeApp(firebaseConfig);
@@ -499,8 +321,8 @@
     let archivedOrders = [];
     let selectedTable = 'ALL';
     let selectedStatus = 'ALL';
-    
     let outOfStockIds = [];
+
     const catalogItems = [
       { id: 1, name: "Special Masala Tea" },
       { id: 2, name: "Milk Coffee" },
@@ -516,7 +338,6 @@
       initInventoryListener();
     });
 
-    /* Theme / Dark Mode Handler */
     function initTheme() {
       const savedTheme = localStorage.getItem('theme');
       if (savedTheme) {
@@ -525,12 +346,6 @@
         const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
         applyTheme(prefersDark ? 'dark' : 'light');
       }
-
-      window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
-        if (!localStorage.getItem('theme')) {
-          applyTheme(e.matches ? 'dark' : 'light');
-        }
-      });
     }
 
     function toggleTheme() {
@@ -543,18 +358,12 @@
     function applyTheme(theme) {
       document.documentElement.setAttribute('data-theme', theme);
       const btn = document.getElementById('theme-toggle-btn');
-      if (btn) {
-        btn.innerText = theme === 'dark' ? '☀️ Light Mode' : '🌙 Dark Mode';
-      }
+      if (btn) btn.innerText = theme === 'dark' ? '☀️ Light Mode' : '🌙 Dark Mode';
     }
 
     function initInventoryListener() {
       db.collection("inventory").doc("menu_status").onSnapshot(doc => {
-        if (doc.exists) {
-          outOfStockIds = doc.data().outOfStock || [];
-        } else {
-          outOfStockIds = [];
-        }
+        outOfStockIds = doc.exists ? (doc.data().outOfStock || []) : [];
         renderInventoryControls();
       });
     }
@@ -571,8 +380,7 @@
           btn.style.background = "#22c55e";
           btn.classList.remove('sound-off');
         } catch (e) {
-          console.error("Audio activation error:", e);
-          alert("Could not enable audio. Please tap again.");
+          alert("Audio blocked by browser. Please tap again.");
         }
       } else {
         soundEnabled = false;
@@ -581,6 +389,7 @@
         btn.classList.add('sound-off');
       }
     }
+
     function playChime() {
       if (!soundEnabled || !audioCtx) return;
       if (audioCtx.state === 'suspended') audioCtx.resume();
@@ -605,9 +414,7 @@
     function getMillis(ts) {
       if (ts && typeof ts.toMillis === 'function') return ts.toMillis();
       return Date.now();
-    }
-
-    function getTimeString(ts) {
+    }function getTimeString(ts) {
       if (ts && typeof ts.toDate === 'function') {
         return ts.toDate().toLocaleTimeString('en-US', { timeZone: 'Asia/Kathmandu', hour: '2-digit', minute: '2-digit', hour12: true });
       }
@@ -616,25 +423,20 @@
 
     function initKitchenDisplay() {
       isInitialLoad = true;
-      
       db.collection("orders").onSnapshot(snapshot => {
         snapshot.docChanges().forEach(change => {
           if (change.type === "added" && !isInitialLoad) playChime();
         });
         
         isInitialLoad = false;
-        rawAllOrders = [];
-        activeOrders = [];
-        archivedOrders = [];
+        rawAllOrders = []; activeOrders = []; archivedOrders = [];
 
         snapshot.forEach(doc => {
-          const data = doc.data();
-          const item = { id: doc.id, ...data };
+          const item = { id: doc.id, ...doc.data() };
           rawAllOrders.push(item);
-
-          if (data.status === "Archived") {
+          if (item.status === "Archived") {
             archivedOrders.push(item);
-          } else if (data.status === "Pending" || data.status === "Preparing" || data.status === "Served") {
+          } else {
             activeOrders.push(item);
           }
         });
@@ -647,14 +449,12 @@
         renderOrders();
         renderArchivedTable();
       }, error => {
-        console.error("Firestore Error:", error);
         document.getElementById('orders-list').innerHTML = `
           <div class="empty-state">
             <div class="empty-icon">⚠️</div>
-            <div class="empty-title">Firestore Error (${error.code || 'Connection'})</div>
-            <div class="empty-subtitle" style="color: #ef4444; font-weight: 600; margin-top: 8px;">${error.message}</div>
-          </div>
-        `;
+            <div class="empty-title">Firestore Error</div>
+            <div class="empty-subtitle" style="color: #ef4444;">${error.message}</div>
+          </div>`;
       });
     }
 
@@ -689,10 +489,9 @@
         indicator.style.display = 'flex';
         indicator.innerHTML = `
           <div class="status-indicator-banner">
-            Showing only: <b>${selectedStatus} Orders</b> 
-            <button onclick="filterByStatus('ALL')">Clear filter</button>
-          </div>
-        `;
+            Showing: <b>${selectedStatus} Orders</b> 
+            <button onclick="filterByStatus('ALL')">Clear Filter</button>
+          </div>`;
         if (selectedStatus === 'Pending') cardPending.classList.add('active-metric-card');
         if (selectedStatus === 'Served') cardServed.classList.add('active-metric-card');
       }
@@ -718,7 +517,6 @@
 
     function renderOrders() {
       const list = document.getElementById('orders-list');
-      
       let filtered = activeOrders;
       if (selectedStatus !== 'ALL') filtered = filtered.filter(o => o.status === selectedStatus);
       if (selectedTable !== 'ALL') filtered = filtered.filter(o => String(o.table) === String(selectedTable));
@@ -726,27 +524,21 @@
       if (filtered.length === 0) {
         list.innerHTML = `
           <div class="empty-state">
-            <div class="empty-icon">🍵</div>
-            <div class="empty-title">No Orders Found</div>
-            <div class="empty-subtitle">There are no orders matching your current filters.</div>
-          </div>
-        `;
+            <div class="empty-icon">☕</div>
+            <div class="empty-title">No Active Orders</div>
+            <div class="empty-subtitle">There are no orders matching your selected filters right now.</div>
+          </div>`;
         return;
       }
 
-      list.innerHTML = '';
-      filtered.forEach(order => {
-        const id = order.id;
-        const itemsText = order.items ? order.items.map(i => `
-          <li>
-            <span>${i.name}</span> 
-            <span class="qty">x${i.qty}</span>
-          </li>
-        `).join('') : '';
+      list.innerHTML = filtered.map(order => {
+        const itemsText = order.items && order.items.length > 0 
+          ? order.items.map(i => `<li><span>${i.name}</span> <span class="qty">x${i.qty}</span></li>`).join('')
+          : '<li style="color:var(--text-sub); border:none;">No items recorded</li>';
         const formattedTime = getTimeString(order.timestamp);
         const cardClass = order.status === 'Served' ? 'done' : order.status === 'Preparing' ? 'preparing' : '';
 
-        list.innerHTML += `
+        return `
           <div class="order-card ${cardClass}">
             <div>
               <div class="order-header">
@@ -757,25 +549,27 @@
               <ul class="items-list">${itemsText}</ul>
             </div>
             <div class="order-footer">
-              <div class="order-total">Total: NPR ${order.total}</div>
+              <div class="order-total">Total: NPR ${order.total || 0}</div>
               <div class="actions">
                 ${order.status === 'Pending' 
-                  ? `<button class="btn btn-prepare" onclick="updateOrderStatus('${id}', 'Preparing')">Prepare</button>` 
+                  ? `<button class="btn btn-prepare" onclick="updateOrderStatus('${order.id}', 'Preparing')">Prepare</button>` 
                   : order.status === 'Preparing'
-                  ? `<button class="btn btn-served" onclick="updateOrderStatus('${id}', 'Served')">Serve</button>`
-                  : `<button class="btn btn-archive" onclick="updateOrderStatus('${id}', 'Archived')">Archive</button>`
+                  ? `<button class="btn btn-served" onclick="updateOrderStatus('${order.id}', 'Served')">Serve</button>`
+                  : `<button class="btn btn-archive" onclick="updateOrderStatus('${order.id}', 'Archived')">Archive</button>`
                 }
-                <button class="btn btn-print" onclick="printReceipt('${id}')">🖨️ Ticket</button>
-                <button class="btn btn-edit" onclick="editTableNumber('${id}', '${order.table}')">✏️</button>
-                <button class="btn btn-danger" onclick="deleteOrder('${id}')">🗑️</button>
+                <button class="btn btn-print" onclick="printReceipt('${order.id}')" title="Print Ticket">🖨️ Ticket</button>
+                <button class="btn btn-edit" onclick="editTableNumber('${order.id}', '${order.table}')" title="Edit Table">✏️</button>
+                <button class="btn btn-danger" onclick="deleteOrder('${order.id}')" title="Delete Order">🗑️</button>
               </div>
             </div>
-          </div>
-        `;
-      });
-          }
+          </div>`;
+      }).join('');
+    }
+
     function renderArchivedTable() {
       const tbody = document.getElementById('archive-list-body');
+      if (!tbody) return;
+
       if (archivedOrders.length === 0) {
         tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding: 24px; color:var(--text-sub);">No archived orders yet.</td></tr>`;
         return;
@@ -789,13 +583,12 @@
             <td><b>${o.table === 'Takeaway' ? '🥡 Takeaway' : 'Table #' + o.table}</b></td>
             <td>${itemsSummary}</td>
             <td>${timeStr}</td>
-            <td style="color:#22c55e;">NPR ${o.total}</td>
+            <td style="color:#22c55e;">NPR ${o.total || 0}</td>
             <td>
               <button class="btn btn-edit" onclick="updateOrderStatus('${o.id}', 'Served')">Unarchive</button>
               <button class="btn btn-print" onclick="printReceipt('${o.id}')">🖨️</button>
             </td>
-          </tr>
-        `;
+          </tr>`;
       }).join('');
     }
 
@@ -816,15 +609,11 @@
             <button 
               onclick="toggleStockStatus(${item.id})"
               style="padding:6px 14px; border-radius:8px; font-weight:700; font-size:12px; cursor:pointer; border:none; ${
-                isSoldOut 
-                  ? 'background:#fef2f2; color:#ef4444; border:1px solid #fecaca;' 
-                  : 'background:#f0fdf4; color:#16a34a; border:1px solid #bbf7d0;'
-              }"
-            >
+                isSoldOut ? 'background:#fef2f2; color:#ef4444; border:1px solid #fecaca;' : 'background:#f0fdf4; color:#16a34a; border:1px solid #bbf7d0;'
+              }">
               ${isSoldOut ? '🔴 Sold Out' : '🟢 In Stock'}
             </button>
-          </div>
-        `;
+          </div>`;
       }).join('');
     }
 
@@ -849,12 +638,10 @@
         <div class="ticket-time">Time: ${formattedTime}</div>
         <table class="ticket-items"><tbody>${itemsRows}</tbody></table>
         <div class="ticket-divider"></div>
-        <div class="ticket-total">TOTAL: NPR ${order.total}</div>
-        <div class="ticket-footer">--- Order ID: ${id.substring(0, 8)} ---</div>
-      `;
+        <div class="ticket-total">TOTAL: NPR ${order.total || 0}</div>
+        <div class="ticket-footer">--- Order ID: ${id.substring(0, 8)} ---</div>`;
       window.print();
     }
-
     async function updateOrderStatus(id, newStatus) { await db.collection("orders").doc(id).update({ status: newStatus }); }
     async function editTableNumber(id, currentTable) {
       const newTable = prompt("Enter correct Table Number or 'Takeaway':", currentTable);
@@ -870,6 +657,3 @@
   </script>
 </body>
 </html>
-    
-    
-    
