@@ -6,21 +6,57 @@
   <title>TeaToast - Digital Menu & Ordering</title>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    * { box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; margin: 0; padding: 0; }
-    body { background: #f8fafc; color: #0f172a; padding-bottom: 90px; }
+    :root {
+      --bg-body: #f8fafc;
+      --bg-header: #ffffff;
+      --bg-card: #ffffff;
+      --text-main: #0f172a;
+      --text-sub: #64748b;
+      --border-color: #e2e8f0;
+      --btn-bg: #0f172a;
+      --btn-text: #ffffff;
+      --badge-bg: #e0f2fe;
+      --badge-text: #0369a1;
+      --modal-bg: #ffffff;
+      --shadow: rgba(0,0,0,0.05);
+    }
+
+    [data-theme="dark"] {
+      --bg-body: #0b0f19;
+      --bg-header: #111827;
+      --bg-card: #111827;
+      --text-main: #f8fafc;
+      --text-sub: #94a3b8;
+      --border-color: #1f2937;
+      --btn-bg: #3b82f6;
+      --btn-text: #ffffff;
+      --badge-bg: #1e3a8a;
+      --badge-text: #93c5fd;
+      --modal-bg: #111827;
+      --shadow: rgba(0,0,0,0.3);
+    }
+
+    * { box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; margin: 0; padding: 0; transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease; }
+    body { background: var(--bg-body); color: var(--text-main); padding-bottom: 90px; min-height: 100vh; }
     
-    .header { background: white; padding: 16px 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 10; display: flex; justify-content: space-between; align-items: center; }
-    .header h1 { font-size: 20px; font-weight: 700; color: #0f172a; display: flex; align-items: center; gap: 8px; }
+    .header { background: var(--bg-header); padding: 16px 20px; box-shadow: 0 1px 3px var(--shadow); position: sticky; top: 0; z-index: 10; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); }
+    .brand { display: flex; align-items: center; gap: 10px; }
+    .brand-logo { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 1px solid var(--border-color); }
+    .header h1 { font-size: 20px; font-weight: 700; color: var(--text-main); display: flex; align-items: center; gap: 8px; }
     
-    /* Interactive Table Select Dropdown Styling */
+    .header-right { display: flex; align-items: center; gap: 10px; }
+
+    .theme-toggle-btn { background: var(--border-color); color: var(--text-main); border: none; padding: 8px 12px; border-radius: 20px; font-weight: 600; font-size: 13px; cursor: pointer; }
+    .theme-toggle-btn:hover { opacity: 0.8; }
+
     .table-select-badge { 
-      background: #e0f2fe; 
-      color: #0369a1; 
+      background: var(--badge-bg); 
+      color: var(--badge-text); 
       padding: 6px 12px; 
       border-radius: 20px; 
       font-size: 13px; 
       font-weight: 700; 
-      border: 1px solid #bae6fd;
+      border: 1px solid var(--border-color);
       outline: none;
       cursor: pointer;
       appearance: none;
@@ -34,74 +70,106 @@
     }
     .table-select-badge:focus { border-color: #0284c7; box-shadow: 0 0 0 2px rgba(2, 132, 199, 0.2); }
     
-    .category-nav { display: flex; gap: 8px; overflow-x: auto; padding: 12px 20px; background: white; border-bottom: 1px solid #e2e8f0; scrollbar-width: none; }
+    .category-nav { display: flex; gap: 8px; overflow-x: auto; padding: 12px 20px; background: var(--bg-header); border-bottom: 1px solid var(--border-color); scrollbar-width: none; }
     .category-nav::-webkit-scrollbar { display: none; }
-    .cat-btn { background: #f1f5f9; border: none; padding: 8px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; color: #64748b; white-space: nowrap; cursor: pointer; transition: all 0.2s; }
-    .cat-btn.active { background: #0f172a; color: white; }
+    .cat-btn { background: var(--border-color); border: none; padding: 8px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; color: var(--text-sub); white-space: nowrap; cursor: pointer; transition: all 0.2s; }
+    .cat-btn.active { background: var(--text-main); color: var(--bg-header); }
     
     .container { padding: 16px 20px; max-width: 600px; margin: 0 auto; }
     .menu-grid { display: flex; flex-direction: column; gap: 12px; }
     
-    .menu-card { background: white; border-radius: 12px; padding: 12px; display: flex; gap: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); border: 1px solid #e2e8f0; align-items: center; }
-    .menu-img { width: 75px; height: 75px; border-radius: 8px; object-fit: cover; background: #f1f5f9; flex-shrink: 0; }
+    .menu-card { background: var(--bg-card); border-radius: 12px; padding: 12px; display: flex; gap: 12px; box-shadow: 0 2px 4px var(--shadow); border: 1px solid var(--border-color); align-items: center; }
+    .menu-img { width: 75px; height: 75px; border-radius: 8px; object-fit: cover; background: var(--border-color); flex-shrink: 0; }
     .menu-details { flex-grow: 1; }
-    .menu-title { font-size: 15px; font-weight: 700; margin-bottom: 4px; color: #0f172a; }
+    .menu-title { font-size: 15px; font-weight: 700; margin-bottom: 4px; color: var(--text-main); }
     .menu-price { font-size: 14px; font-weight: 700; color: #16a34a; }
     
-    .add-btn { background: #0f172a; color: white; border: none; padding: 8px 14px; border-radius: 8px; font-weight: 600; font-size: 13px; cursor: pointer; transition: transform 0.1s ease; }
+    .add-btn { background: var(--btn-bg); color: var(--btn-text); border: none; padding: 8px 14px; border-radius: 8px; font-weight: 600; font-size: 13px; cursor: pointer; transition: transform 0.1s ease; }
     .add-btn:active { transform: scale(0.95); }
 
     .qty-controls { display: flex; align-items: center; gap: 8px; }
-    .qty-btn { background: #f1f5f9; border: 1px solid #cbd5e1; width: 28px; height: 28px; border-radius: 6px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-    .qty-count { font-size: 14px; font-weight: 700; }
+    .qty-btn { background: var(--border-color); border: 1px solid var(--border-color); color: var(--text-main); width: 28px; height: 28px; border-radius: 6px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+    .qty-count { font-size: 14px; font-weight: 700; color: var(--text-main); }
+
+    .sold-out-badge { background: #fee2e2; color: #ef4444; border: 1px solid #fecaca; padding: 6px 10px; border-radius: 6px; font-size: 12px; font-weight: 700; }
+
+    /* Social Bar Strip */
+    .social-strip { display: flex; justify-content: center; gap: 16px; padding: 16px; margin-top: 10px; border-top: 1px solid var(--border-color); }
+    .social-btn { width: 34px; height: 34px; border-radius: 50%; background: var(--border-color); display: flex; align-items: center; justify-content: center; color: var(--text-main); text-decoration: none; transition: transform 0.2s; }
+    .social-btn:hover { transform: scale(1.1); }
+    .social-btn svg { width: 16px; height: 16px; fill: currentColor; }
 
     /* Bottom Cart Bar */
-    .cart-bar { position: fixed; bottom: 0; left: 0; right: 0; background: white; border-top: 1px solid #e2e8f0; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 -4px 12px rgba(0,0,0,0.05); z-index: 20; display: none; }
-    .cart-info { font-size: 14px; font-weight: 600; }
+    .cart-bar { position: fixed; bottom: 0; left: 0; right: 0; background: var(--bg-header); border-top: 1px solid var(--border-color); padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 -4px 12px var(--shadow); z-index: 20; display: none; }
+    .cart-info { font-size: 14px; font-weight: 600; color: var(--text-main); }
     .cart-total { font-size: 16px; font-weight: 700; color: #16a34a; }
     .order-btn { background: #16a34a; color: white; border: none; padding: 12px 20px; border-radius: 10px; font-weight: 700; font-size: 14px; cursor: pointer; }
 
-    /* Order Confirmation Popup */
-    .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 100; padding: 20px; }
-    .modal-card { background: white; border-radius: 16px; width: 100%; max-width: 360px; padding: 24px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
-    .modal-card h3 { font-size: 20px; margin-bottom: 8px; }
-    .modal-card p { font-size: 14px; color: #64748b; margin-bottom: 16px; }
-    .close-btn { background: #0f172a; color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 700; width: 100%; cursor: pointer; }
+    /* Order Confirmation & Status Modal */
+    .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); display: none; justify-content: center; align-items: center; z-index: 100; padding: 20px; }
+    .modal-card { background: var(--modal-bg); border-radius: 16px; width: 100%; max-width: 360px; padding: 24px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.2); border: 1px solid var(--border-color); }
+    .modal-card h3 { font-size: 20px; margin-bottom: 8px; color: var(--text-main); }
+    .modal-card p { font-size: 14px; color: var(--text-sub); margin-bottom: 16px; }
+    .close-btn { background: var(--btn-bg); color: var(--btn-text); border: none; padding: 10px 20px; border-radius: 8px; font-weight: 700; width: 100%; cursor: pointer; }
+
+    /* Live Tracker Styles */
+    .tracker-status-box { background: var(--bg-body); border-radius: 12px; padding: 16px; margin: 16px 0; border: 1px solid var(--border-color); text-align: left; }
+    .status-step { display: flex; align-items: center; gap: 10px; font-size: 13px; font-weight: 700; color: var(--text-sub); margin-bottom: 10px; transition: all 0.3s; }
+    .status-step:last-child { margin-bottom: 0; }
+    .status-step.active { color: #3b82f6; font-size: 14px; }
+    .status-step.done { color: #16a34a; }
   </style>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 </head>
-<body>
+<body data-theme="dark">
 
   <div class="header">
-    <h1>🍵 TeaToast</h1>
-    <!-- Dropdown Table Select Menu -->
-    <select class="table-select-badge" id="table-select" onchange="updateTableSelection(this.value)">
-      <option value="Takeaway">🥡 Takeaway</option>
-      <option value="1">Table #1</option>
-      <option value="2">Table #2</option>
-      <option value="3">Table #3</option>
-      <option value="4">Table #4</option>
-      <option value="5">Table #5</option>
-      <option value="6">Table #6</option>
-      <option value="7">Table #7</option>
-      <option value="8">Table #8</option>
-      <option value="9">Table #9</option>
-      <option value="10">Table #10</option>
-    </select>
+    <div class="brand">
+      <img src="d8f60869d757f9d2df2760c4ace6cceb7a3cd53a14fc7d018164d068ee47a239.png" alt="TeaToast Logo" class="brand-logo" onerror="this.style.display='none'">
+      <h1>TeaToast</h1>
+    </div>
+    <div class="header-right">
+      <select class="table-select-badge" id="table-select" onchange="updateTableSelection(this.value)">
+        <option value="Takeaway">🥡 Takeaway</option>
+        <option value="1">Table #1</option>
+        <option value="2">Table #2</option>
+        <option value="3">Table #3</option>
+        <option value="4">Table #4</option>
+        <option value="5">Table #5</option>
+        <option value="6">Table #6</option>
+        <option value="7">Table #7</option>
+        <option value="8">Table #8</option>
+        <option value="9">Table #9</option>
+        <option value="10">Table #10</option>
+      </select>
+      <button id="theme-toggle-btn" class="theme-toggle-btn" onclick="toggleTheme()">☀️ Light</button>
+    </div>
   </div>
 
   <div class="category-nav" id="category-bar">
-    <button class="cat-btn active" onclick="filterCategory('All')">All Items</button>
-    <button class="cat-btn" onclick="filterCategory('Tea & Coffee')">Tea & Coffee</button>
-    <button class="cat-btn" onclick="filterCategory('Toast & Snacks')">Toast & Snacks</button>
-    <button class="cat-btn" onclick="filterCategory('Momo & Noodles')">Momo & Noodles</button>
+    <button class="cat-btn active" onclick="filterCategory('All', event)">All Items</button>
+    <button class="cat-btn" onclick="filterCategory('Tea & Coffee', event)">Tea & Coffee</button>
+    <button class="cat-btn" onclick="filterCategory('Toast & Snacks', event)">Toast & Snacks</button>
+    <button class="cat-btn" onclick="filterCategory('Momo & Noodles', event)">Momo & Noodles</button>
   </div>
 
   <div class="container">
     <div class="menu-grid" id="menu-container"></div>
-  </div>
 
+    <!-- Social Media Footer Strip -->
+    <div class="social-strip">
+      <a href="https://www.instagram.com/_floydaryan?stem=c3BvY3Zle3Y3cy03bn3" target="_blank" rel="noopener" class="social-btn" title="Instagram">
+        <svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+      </a>
+      <a href="https://www.facebook.com/awthorfinn" target="_blank" rel="noopener" class="social-btn" title="Facebook">
+        <svg viewBox="0 0 24 24"><path d="M9 8H6v4h3v12h5V12h3.642L18 8h-4V6.333C14 5.37 14.5 5 15.5 5H18V0h-3.808C10.59 0 9 1.581 9 4.615V8z"/></svg>
+      </a>
+      <a href="https://www.tiktok.com/@.floydaryan" target="_blank" rel="noopener" class="social-btn" title="TikTok">
+        <svg viewBox="0 0 24 24"><path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.5.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-2.1.05-4.21.07-6.31.02-4.34-.03-8.68.02-13.02z"/></svg>
+      </a>
+    </div>
+  </div>
   <div class="cart-bar" id="cart-bar">
     <div class="cart-info">
       <span id="cart-count">0 items</span> • <span class="cart-total" id="cart-total">NPR 0</span>
@@ -109,12 +177,19 @@
     <button class="order-btn" onclick="submitOrder()">Place Order</button>
   </div>
 
-  <!-- Success Modal -->
+  <!-- Real-Time Order Tracker Modal -->
   <div class="modal" id="success-modal">
     <div class="modal-card">
-      <h3>🎉 Order Placed!</h3>
-      <p id="modal-desc">Your order has been sent to the TeaToast kitchen. We will serve it to your table shortly!</p>
-      <button class="close-btn" onclick="closeModal()">Done</button>
+      <h3>🍵 Order Tracker</h3>
+      <p id="modal-desc">Your order is being processed in real-time.</p>
+      
+      <div class="tracker-status-box">
+        <div class="status-step" id="step-pending">⏳ 1. Order Received</div>
+        <div class="status-step" id="step-preparing">👨‍🍳 2. Kitchen Preparing</div>
+        <div class="status-step" id="step-served">✅ 3. Served to Table</div>
+      </div>
+
+      <button class="close-btn" onclick="closeModal()">Close Tracker</button>
     </div>
   </div>
 
@@ -132,7 +207,6 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
-    // Menu Data
     const menuItems = [
       { id: 1, name: "Special Masala Tea", price: 40, category: "Tea & Coffee", img: "https://images.unsplash.com/photo-1576092768241-dec231879fc3?w=200&auto=format&fit=crop" },
       { id: 2, name: "Milk Coffee", price: 60, category: "Tea & Coffee", img: "https://images.unsplash.com/photo-1517701604599-bb29b565090c?w=200&auto=format&fit=crop" },
@@ -145,8 +219,14 @@
     let cart = {};
     let currentCategory = 'All';
     let tableNumber = 'Takeaway';
+    let outOfStockIds = [];
+    let activeOrderId = null;
+    let orderStatusUnsubscribe = null;
 
     window.onload = () => {
+      const savedTheme = localStorage.getItem('teastoast_theme') || 'dark';
+      setTheme(savedTheme);
+
       const urlParams = new URLSearchParams(window.location.search);
       const tableParam = urlParams.get('table');
       const selectElem = document.getElementById('table-select');
@@ -157,18 +237,39 @@
       } else {
         tableNumber = selectElem.value;
       }
-      renderMenu();
+
+      db.collection("inventory").doc("menu_status").onSnapshot(doc => {
+        if (doc.exists) {
+          outOfStockIds = doc.data().outOfStock || [];
+        } else {
+          outOfStockIds = [];
+        }
+        renderMenu();
+      });
     };
 
-    function updateTableSelection(val) {
-      tableNumber = val;
+    function toggleTheme() {
+      const current = document.body.getAttribute('data-theme');
+      const next = current === 'dark' ? 'light' : 'dark';
+      setTheme(next);
     }
 
-    function filterCategory(cat) {
+    function setTheme(theme) {
+      document.body.setAttribute('data-theme', theme);
+      localStorage.setItem('teastoast_theme', theme);
+      const btn = document.getElementById('theme-toggle-btn');
+      if (btn) {
+        btn.innerText = theme === 'dark' ? '☀️ Light' : '🌙 Dark';
+      }
+    }
+
+    function updateTableSelection(val) { tableNumber = val; }
+
+    function filterCategory(cat, e) {
       currentCategory = cat;
       const btns = document.querySelectorAll('.cat-btn');
       btns.forEach(b => b.classList.remove('active'));
-      event.target.classList.add('active');
+      if (e) e.target.classList.add('active');
       renderMenu();
     }
 
@@ -182,16 +283,19 @@
 
       itemsToRender.forEach(item => {
         const qty = cart[item.id] ? cart[item.id].qty : 0;
-        
+        const isSoldOut = outOfStockIds.includes(item.id);
+
         container.innerHTML += `
-          <div class="menu-card">
+          <div class="menu-card" style="${isSoldOut ? 'opacity: 0.6;' : ''}">
             <img src="${item.img}" class="menu-img" alt="${item.name}">
             <div class="menu-details">
               <div class="menu-title">${item.name}</div>
               <div class="menu-price">NPR ${item.price}</div>
             </div>
             <div>
-              ${qty === 0 ? `
+              ${isSoldOut ? `
+                <span class="sold-out-badge">Sold Out</span>
+              ` : qty === 0 ? `
                 <button class="add-btn" onclick="updateCart(${item.id}, 1)">Add +</button>
               ` : `
                 <div class="qty-controls">
@@ -212,10 +316,7 @@
         cart[id] = { name: item.name, price: item.price, qty: 0 };
       }
       cart[id].qty += change;
-
-      if (cart[id].qty <= 0) {
-        delete cart[id];
-      }
+      if (cart[id].qty <= 0) delete cart[id];
 
       renderMenu();
       updateCartBar();
@@ -254,7 +355,7 @@
       orderItems.forEach(i => totalPrice += (i.price * i.qty));
 
       try {
-        await db.collection("orders").add({
+        const docRef = await db.collection("orders").add({
           table: tableNumber,
           items: orderItems,
           total: totalPrice,
@@ -262,20 +363,49 @@
           timestamp: firebase.firestore.FieldValue.serverTimestamp()
         });
 
-        // Custom Modal Description
+        activeOrderId = docRef.id;
+        
         const descText = tableNumber === 'Takeaway' 
-          ? 'Your takeaway order has been sent to the TeaToast kitchen!' 
-          : `Your order has been sent to the TeaToast kitchen for Table #${tableNumber}!`;
+          ? 'Your takeaway order has been received by the kitchen!' 
+          : `Your order for Table #${tableNumber} has been received by the kitchen!`;
         document.getElementById('modal-desc').innerText = descText;
 
-        // Reset cart and show popup
         cart = {};
         renderMenu();
         updateCartBar();
         document.getElementById('success-modal').style.display = 'flex';
+        
+        trackLiveOrderStatus(activeOrderId);
       } catch (err) {
         alert("Error placing order: " + err.message);
       }
+    }
+    function trackLiveOrderStatus(orderId) {
+      if (orderStatusUnsubscribe) orderStatusUnsubscribe();
+
+      orderStatusUnsubscribe = db.collection("orders").doc(orderId).onSnapshot(doc => {
+        if (!doc.exists) return;
+        const status = doc.data().status;
+
+        const step1 = document.getElementById('step-pending');
+        const step2 = document.getElementById('step-preparing');
+        const step3 = document.getElementById('step-served');
+
+        step1.className = 'status-step';
+        step2.className = 'status-step';
+        step3.className = 'status-step';
+
+        if (status === 'Pending') {
+          step1.className = 'status-step active';
+        } else if (status === 'Preparing') {
+          step1.className = 'status-step done';
+          step2.className = 'status-step active';
+        } else if (status === 'Served') {
+          step1.className = 'status-step done';
+          step2.className = 'status-step done';
+          step3.className = 'status-step done';
+        }
+      });
     }
 
     function closeModal() {
