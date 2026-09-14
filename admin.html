@@ -23,6 +23,7 @@
       --hover-bg: #f8fafc;
       --input-border: #cbd5e1;
       --social-bg: #f8fafc;
+      --tiktok-icon-color: #000000;
     }
 
     [data-theme="dark"] {
@@ -42,6 +43,7 @@
       --hover-bg: #334155;
       --input-border: #475569;
       --social-bg: #0f172a;
+      --tiktok-icon-color: #ffffff;
     }
 
     * { box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; margin: 0; padding: 0; transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease; }
@@ -62,14 +64,18 @@
       70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(34, 197, 94, 0); }
       100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
     }
-
     /* Social Links Styling */
     .social-links { display: flex; align-items: center; gap: 6px; background: var(--social-bg); padding: 4px 8px; border-radius: 10px; border: 1px solid var(--border-color); }
-    .social-btn { display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 8px; text-decoration: none; font-size: 14px; transition: transform 0.15s ease, background-color 0.2s ease; }
+    .social-btn { display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 8px; text-decoration: none; transition: transform 0.15s ease, background-color 0.2s ease; }
     .social-btn:hover { transform: translateY(-2px); }
-    .social-btn.instagram { color: #e1306c; background: rgba(225, 48, 108, 0.1); }
-    .social-btn.facebook { color: #1877f2; background: rgba(24, 119, 242, 0.1); }
-    .social-btn.tiktok { color: var(--text-main); background: rgba(100, 116, 139, 0.15); }
+    .social-btn svg { width: 18px; height: 18px; display: block; }
+    
+    .social-btn.instagram { background: rgba(225, 48, 108, 0.1); }
+    .social-btn.instagram svg { fill: #e1306c; }
+    .social-btn.facebook { background: rgba(24, 119, 242, 0.1); }
+    .social-btn.facebook svg { fill: #1877f2; }
+    .social-btn.tiktok { background: rgba(100, 116, 139, 0.15); }
+    .social-btn.tiktok svg { fill: var(--tiktok-icon-color); }
 
     .header-actions { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
     .btn-action { background: var(--bg-body); color: var(--text-main); font-size: 13px; font-weight: 700; padding: 10px 16px; border: 1px solid var(--border-color); border-radius: 10px; cursor: pointer; transition: all 0.2s; }
@@ -165,7 +171,6 @@
     .archive-table th { font-size: 12px; font-weight: 700; color: var(--text-sub); text-transform: uppercase; padding: 12px 16px; border-bottom: 2px solid var(--border-color); }
     .archive-table td { padding: 14px 16px; border-bottom: 1px solid var(--border-color); font-size: 14px; font-weight: 600; color: var(--text-main); }
     .archive-table tr:hover { background: var(--hover-bg); }
-
     /* Visual Empty State */
     .empty-state { grid-column: 1 / -1; background: var(--bg-card); border-radius: 20px; text-align: center; padding: 70px 20px; border: 2px dashed var(--border-color); }
     .empty-icon { font-size: 48px; margin-bottom: 12px; display: inline-block; }
@@ -223,8 +228,7 @@
       </div>
     </div>
   </div>
-
-  <!-- Stock Management Modal (86ing) -->
+ <!-- Stock Management Modal (86ing) -->
   <div class="modal-overlay" id="inventory-modal">
     <div class="modal-box" style="max-width: 500px;">
       <div class="modal-header">
@@ -246,11 +250,17 @@
         <div class="live-badge"><div class="live-dot"></div> Live Stream</div>
       </div>
       <div class="header-actions">
-        <!-- Social Profiles Bar -->
+        <!-- Social Profiles Bar with SVG Logos -->
         <div class="social-links">
-          <a href="https://www.instagram.com/_floydaryan?stkn=c3BvYmUxY3cyb3h6" target="_blank" rel="noopener" class="social-btn instagram" title="Instagram">📸</a>
-          <a href="https://www.facebook.com/imthorfinn" target="_blank" rel="noopener" class="social-btn facebook" title="Facebook">📘</a>
-          <a href="https://www.tiktok.com/@.floydaryan" target="_blank" rel="noopener" class="social-btn tiktok" title="TikTok">🎵</a>
+          <a href="https://www.instagram.com/_floydaryan?stkn=c3BvYmUxY3cyb3h6" target="_blank" rel="noopener" class="social-btn instagram" title="Instagram">
+            <svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+          </a>
+          <a href="https://www.facebook.com/imthorfinn" target="_blank" rel="noopener" class="social-btn facebook" title="Facebook">
+            <svg viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+          </a>
+          <a href="https://www.tiktok.com/@.floydaryan" target="_blank" rel="noopener" class="social-btn tiktok" title="TikTok">
+            <svg viewBox="0 0 24 24"><path d="M12.525 0h3.08c.12 1.455.77 2.768 1.8 3.731 1.03.963 2.41 1.545 3.93 1.579v3.136c-1.87-.04-3.56-.676-4.9-1.744v7.712c0 4.197-3.41 7.6-7.6 7.6-4.198 0-7.6-3.403-7.6-7.6 0-4.197 3.402-7.6 7.6-7.6.43 0 .85.037 1.26.108v3.23c-.41-.122-.84-.19-1.26-.19-2.43 0-4.4 1.97-4.4 4.4 0 2.43 1.97 4.4 4.4 4.4 2.43 0 4.4-1.97 4.4-4.4V0z"/></svg>
+          </a>
         </div>
         <button class="btn-action" id="theme-toggle-btn" onclick="toggleTheme()">🌙 Dark Mode</button>
         <button class="btn-action" onclick="openInventoryModal()">🍱 Manage Stock</button>
@@ -383,6 +393,170 @@
         }
         renderInventoryControls();
       });
+    }<!-- Stock Management Modal (86ing) -->
+  <div class="modal-overlay" id="inventory-modal">
+    <div class="modal-box" style="max-width: 500px;">
+      <div class="modal-header">
+        <h2>🍱 Menu Availability (86ing)</h2>
+        <button class="modal-close" onclick="closeInventoryModal()">✕</button>
+      </div>
+      <div class="modal-body" id="inventory-list">
+        <!-- Toggles rendered via JS -->
+      </div>
+    </div>
+  </div>
+
+  <div class="dashboard-container">
+    
+    <!-- Header -->
+    <div class="header">
+      <div class="brand">
+        <h1>🍵 TeaToast Kitchen</h1>
+        <div class="live-badge"><div class="live-dot"></div> Live Stream</div>
+      </div>
+      <div class="header-actions">
+        <!-- Social Profiles Bar with SVG Logos -->
+        <div class="social-links">
+          <a href="https://www.instagram.com/_floydaryan?stkn=c3BvYmUxY3cyb3h6" target="_blank" rel="noopener" class="social-btn instagram" title="Instagram">
+            <svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+          </a>
+          <a href="https://www.facebook.com/imthorfinn" target="_blank" rel="noopener" class="social-btn facebook" title="Facebook">
+            <svg viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+          </a>
+          <a href="https://www.tiktok.com/@.floydaryan" target="_blank" rel="noopener" class="social-btn tiktok" title="TikTok">
+            <svg viewBox="0 0 24 24"><path d="M12.525 0h3.08c.12 1.455.77 2.768 1.8 3.731 1.03.963 2.41 1.545 3.93 1.579v3.136c-1.87-.04-3.56-.676-4.9-1.744v7.712c0 4.197-3.41 7.6-7.6 7.6-4.198 0-7.6-3.403-7.6-7.6 0-4.197 3.402-7.6 7.6-7.6.43 0 .85.037 1.26.108v3.23c-.41-.122-.84-.19-1.26-.19-2.43 0-4.4 1.97-4.4 4.4 0 2.43 1.97 4.4 4.4 4.4 2.43 0 4.4-1.97 4.4-4.4V0z"/></svg>
+          </a>
+        </div>
+        <button class="btn-action" id="theme-toggle-btn" onclick="toggleTheme()">🌙 Dark Mode</button>
+        <button class="btn-action" onclick="openInventoryModal()">🍱 Manage Stock</button>
+        <button class="btn-action" onclick="openArchiveModal()">📦 View Archives</button>
+        <button id="audio-btn" class="enable-audio-btn" onclick="toggleAudio()">🔔 Enable Sound</button>
+      </div>
+    </div>
+
+    <!-- Summary Metrics -->
+    <div class="metrics-grid">
+      <div class="metric-card interactive" id="card-pending" onclick="filterByStatus('Pending')">
+        <div>
+          <div class="metric-title">Pending Orders</div>
+          <div class="metric-value" id="stat-pending">0</div>
+        </div>
+        <div class="metric-icon icon-orders">⏳</div>
+      </div>
+      <div class="metric-card interactive" id="card-served" onclick="filterByStatus('Served')">
+        <div>
+          <div class="metric-title">Served Orders</div>
+          <div class="metric-value" id="stat-served">0</div>
+        </div>
+        <div class="metric-icon icon-served">✅</div>
+      </div>
+      <div class="metric-card">
+        <div>
+          <div class="metric-title">Shift Revenue</div>
+          <div class="metric-value" id="stat-revenue">NPR 0</div>
+        </div>
+        <div class="metric-icon icon-revenue">💰</div>
+      </div>
+    </div>
+    <!-- Filter Bar -->
+    <div class="filter-section">
+      <div class="table-nav" id="table-filter-bar">
+        <button class="table-chip active" onclick="filterByTable('ALL')">Show All Tables</button>
+      </div>
+      <div id="status-filter-indicator" style="display: none;"></div>
+    </div>
+
+    <!-- Orders Grid -->
+    <div class="orders-grid" id="orders-list">
+      <div class="empty-state">
+        <div class="empty-icon" id="status-icon">⏳</div>
+        <div class="empty-title" id="status-title">Connecting to Firestore...</div>
+        <div class="empty-subtitle" id="status-subtitle">Please check your internet connection or browser settings.</div>
+      </div>
+    </div>
+
+  </div>
+  
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyC616K7b9vsNDcuVrXQpDYOS2L9h1OpxIw",
+      authDomain: "my-cafe12.firebaseapp.com",
+      projectId: "my-cafe12",
+      storageBucket: "my-cafe12.firebasestorage.app",
+      messagingSenderId: "621111977103",
+      appId: "1:621111977103:web:0246bb820fa55f90a9fcfa",
+      measurementId: "G-CM63Q78KHP"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    let audioCtx = null;
+    let soundEnabled = false;
+    let isInitialLoad = true;
+    let rawAllOrders = [];
+    let activeOrders = [];
+    let archivedOrders = [];
+    let selectedTable = 'ALL';
+    let selectedStatus = 'ALL';
+    
+    let outOfStockIds = [];
+    const catalogItems = [
+      { id: 1, name: "Special Masala Tea" },
+      { id: 2, name: "Milk Coffee" },
+      { id: 3, name: "Butter Toast" },
+      { id: 4, name: "Cheese Toast" },
+      { id: 5, name: "Veg Steam Momo" },
+      { id: 6, name: "Chicken Chowmein" }
+    ];
+
+    window.addEventListener('load', () => {
+      initTheme();
+      initKitchenDisplay();
+      initInventoryListener();
+    });
+
+    /* Theme / Dark Mode Handler */
+    function initTheme() {
+      const savedTheme = localStorage.getItem('theme');
+      if (savedTheme) {
+        applyTheme(savedTheme);
+      } else {
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        applyTheme(prefersDark ? 'dark' : 'light');
+      }
+
+      window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+        if (!localStorage.getItem('theme')) {
+          applyTheme(e.matches ? 'dark' : 'light');
+        }
+      });
+    }
+
+    function toggleTheme() {
+      const current = document.documentElement.getAttribute('data-theme') || 'light';
+      const nextTheme = current === 'dark' ? 'light' : 'dark';
+      localStorage.setItem('theme', nextTheme);
+      applyTheme(nextTheme);
+    }
+
+    function applyTheme(theme) {
+      document.documentElement.setAttribute('data-theme', theme);
+      const btn = document.getElementById('theme-toggle-btn');
+      if (btn) {
+        btn.innerText = theme === 'dark' ? '☀️ Light Mode' : '🌙 Dark Mode';
+      }
+    }
+
+    function initInventoryListener() {
+      db.collection("inventory").doc("menu_status").onSnapshot(doc => {
+        if (doc.exists) {
+          outOfStockIds = doc.data().outOfStock || [];
+        } else {
+          outOfStockIds = [];
+        }
+        renderInventoryControls();
+      });
     }
 
     async function toggleAudio() {
@@ -407,7 +581,6 @@
         btn.classList.add('sound-off');
       }
     }
-
     function playChime() {
       if (!soundEnabled || !audioCtx) return;
       if (audioCtx.state === 'suspended') audioCtx.resume();
@@ -443,6 +616,7 @@
 
     function initKitchenDisplay() {
       isInitialLoad = true;
+      
       db.collection("orders").onSnapshot(snapshot => {
         snapshot.docChanges().forEach(change => {
           if (change.type === "added" && !isInitialLoad) playChime();
@@ -541,6 +715,7 @@
       renderTableFilterBar();
       renderOrders();
     }
+
     function renderOrders() {
       const list = document.getElementById('orders-list');
       
@@ -598,8 +773,7 @@
           </div>
         `;
       });
-    }
-
+          }
     function renderArchivedTable() {
       const tbody = document.getElementById('archive-list-body');
       if (archivedOrders.length === 0) {
@@ -652,7 +826,8 @@
           </div>
         `;
       }).join('');
-        }
+    }
+
     async function toggleStockStatus(itemId) {
       let updated = outOfStockIds.includes(itemId)
         ? outOfStockIds.filter(id => id !== itemId)
@@ -695,3 +870,6 @@
   </script>
 </body>
 </html>
+    
+    
+    
