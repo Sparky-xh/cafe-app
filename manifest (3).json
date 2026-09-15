@@ -1,0 +1,17 @@
+{
+  "background_color": "#ffffff",
+  "dir": "ltr",
+  "display": "standalone",
+  "name": "TeaToast",
+  "orientation": "any",
+  "scope": "/",
+  "short_name": "TeaToast",
+  "start_url": "/",
+  "theme_color": "#ffffff",
+  "id": "/app",
+  "description": "Cafe menu",
+  "lang": "en",
+  "categories": [
+    "business"
+  ]
+}
