@@ -1,0 +1,16 @@
+{
+  "background_color": "#ffffff",
+  "dir": "ltr",
+  "display": "standalone",
+  "name": "TeaToast Cafe",
+  "orientation": "any",
+  "scope": "/",
+  "short_name": "TeaToast",
+  "start_url": "/",
+  "theme_color": "#ffffff",
+  "id": "/app",
+  "description": "Digital ordering menu app)",
+  "share_target": {
+    "method": "GET"
+  }
+}
